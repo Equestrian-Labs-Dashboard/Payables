@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Accounts Payable — Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F7F6F2;
+    --panel:#FFFFFF;
+    --panel-2:#F0EFEA;
+    --ink:#15140F;
+    --ink-soft:#5B584E;
+    --line:#DEDBD1;
+    --accent-not-due:#5B584E;
+    --accent-due:#9A6B12;
+    --accent-lt3:#A6432E;
+    --accent-gt3:#7A1F14;
+    --accent-ok:#3B6E4F;
+    --serif:'Fraunces', Georgia, serif;
+    --sans:'Inter', -apple-system, sans-serif;
+    --mono:'IBM Plex Mono', 'Courier New', monospace;
+    --radius:2px;
+    --shadow: 0 1px 0 rgba(21,20,15,0.06);
+  }
+  html[data-theme="dark"]{
+    --bg:#0C0C0B;
+    --panel:#151512;
+    --panel-2:#1C1B17;
+    --ink:#EEEBE2;
+    --ink-soft:#9A968A;
+    --line:#302E28;
+    --accent-not-due:#B9B5A7;
+    --accent-due:#D9A441;
+    --accent-lt3:#E0715A;
+    --accent-gt3:#F0503B;
+    --accent-ok:#6FBF8F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s ease, color .25s ease;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 28px 80px;}
+
+  /* ===== Header ===== */
+  header.top{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;margin-bottom:36px;
+    gap:24px; flex-wrap:wrap;
+  }
+  .brand-eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 6px;
+  }
+  h1{
+    font-family:var(--serif);font-weight:500;font-size:38px;margin:0;
+    letter-spacing:-.01em;
+  }
+  .theme-toggle{
+    display:flex;align-items:center;gap:10px;
+    border:1px solid var(--line);border-radius:999px;padding:6px 6px;
+    background:var(--panel);cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+  }
+  .theme-toggle button{
+    all:unset;cursor:pointer;width:30px;height:30px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .theme-toggle button.active{background:var(--panel-2);}
+  .as-of{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:6px;}
+
+  /* ===== Hero ===== */
+  .hero{
+    display:grid;grid-template-columns:1.1fr 1fr;gap:40px;
+    padding:28px 0 40px; border-bottom:1px solid var(--line); margin-bottom:32px;
+    align-items:end;
+  }
+  .hero-label{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;}
+  .hero-figure{
+    font-family:var(--serif);font-weight:500;font-size:76px;line-height:1;letter-spacing:-.02em;
+  }
+  .hero-figure sup{font-size:28px;font-weight:400;color:var(--ink-soft);top:-.6em;}
+  .hero-sub{font-size:14px;color:var(--ink-soft);margin-top:12px;max-width:38ch;line-height:1.5;}
+  .ledger-beam{width:100%;}
+  .beam-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-bottom:6px;}
+  .beam-track{
+    display:flex;width:100%;height:34px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  }
+  .beam-seg{height:100%;position:relative;}
+  .beam-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;}
+  .beam-legend span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+  /* ===== KPI cards ===== */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:40px;}
+  .kpi{background:var(--panel);padding:20px 18px;position:relative;}
+  .kpi::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;}
+  .kpi[data-k="total"]::before{background:var(--ink);}
+  .kpi[data-k="not_yet_due"]::before{background:var(--accent-not-due);}
+  .kpi[data-k="due_this_month"]::before{background:var(--accent-due);}
+  .kpi[data-k="overdue_lt_3m"]::before{background:var(--accent-lt3);}
+  .kpi[data-k="overdue_gt_3m"]::before{background:var(--accent-gt3);}
+  .kpi-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  .kpi-value{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.01em;}
+  .kpi-pct{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:4px;}
+
+  /* ===== Section titles ===== */
+  .section-title{
+    display:flex;align-items:baseline;gap:12px;margin:0 0 18px;
+  }
+  .section-title h2{font-family:var(--serif);font-size:21px;font-weight:500;margin:0;}
+  .section-title .n{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  section{margin-bottom:48px;}
+
+  /* ===== Charts grid ===== */
+  .charts-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);}
+  .chart-card{background:var(--panel);padding:22px;}
+  .chart-card h3{font-family:var(--sans);font-weight:600;font-size:13px;margin:0 0 16px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  canvas{max-width:100%;}
+
+  /* ===== Filters ===== */
+  .filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .filters select, .filters input{
+    font-family:var(--mono);font-size:12px;background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);padding:8px 10px;border-radius:var(--radius);
+  }
+  .filters input[type="text"]{min-width:200px;}
+
+  /* ===== Table ===== */
+  table{width:100%;border-collapse:collapse;background:var(--panel);}
+  thead th{
+    text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-soft);border-bottom:1px solid var(--line);padding:10px 12px;font-weight:500;
+  }
+  tbody td{padding:12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle;}
+  tbody tr{cursor:pointer;}
+  tbody tr:hover{background:var(--panel-2);}
+  tbody tr.selected{background:var(--panel-2);}
+  td.num, th.num{font-family:var(--mono);text-align:right;}
+  .cat-bar{display:inline-flex;height:6px;width:110px;border-radius:2px;overflow:hidden;vertical-align:middle;margin-right:8px;border:1px solid var(--line);}
+  .cat-bar span{height:100%;display:block;}
+  .cat-name{display:flex;align-items:center;font-weight:500;}
+  .status-chip{
+    font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  .status-chip.overdue{color:var(--accent-lt3);border-color:var(--accent-lt3);}
+  .status-chip.due{color:var(--accent-due);border-color:var(--accent-due);}
+  .status-chip.notdue{color:var(--ink-soft);}
+  .status-chip.paid{color:var(--accent-ok);border-color:var(--accent-ok);}
+
+  .unclassified-banner{
+    display:none;
+    font-family:var(--mono);font-size:12px;background:var(--panel-2);border:1px solid var(--line);
+    padding:12px 16px;margin-bottom:20px;border-left:3px solid var(--accent-due);
+  }
+
+  footer{
+    margin-top:60px;padding-top:20px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+
+  @media (max-width:900px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .hero{grid-template-columns:1fr;}
+    .charts-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="brand-eyebrow">Corro · Cavali — Finance</p>
+      <h1>Accounts Payable</h1>
+      <p class="as-of" id="asOf">As of —</p>
+    </div>
+    <div class="theme-toggle" id="themeToggle">
+      <button data-mode="light" title="Light mode">☀️</button>
+      <button data-mode="dark" title="Dark mode">🌙</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="hero-label">Total outstanding</p>
+      <div class="hero-figure"><sup>$</sup><span id="heroTotal">0</span></div>
+      <p class="hero-sub">Everything currently owed to vendors across Corro and Cavali, pulled from Bill.com. Segmented below by how urgently it needs attention.</p>
+    </div>
+    <div>
+      <div class="ledger-beam">
+        <div class="beam-label"><span>Not due</span><span>Overdue &gt; 3 months</span></div>
+        <div class="beam-track" id="beamTrack"></div>
+        <div class="beam-legend" id="beamLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="kpi-row" id="kpiRow"></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>Where the balance sits</h2><span class="n">by expense category</span></div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Category × Aging</h3>
+        <canvas id="categoryChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Total AP — 6 month trend</h3>
+        <canvas id="trendChart" height="220"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>Category summary</h2><span class="n">click a row to drill into invoices</span></div>
+    <div class="unclassified-banner" id="unclassifiedBanner"></div>
+    <table id="categoryTable">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th class="num">Total</th>
+          <th class="num">Not due</th>
+          <th class="num">Due this month</th>
+          <th class="num">&lt; 3 months</th>
+          <th class="num">&gt; 3 months</th>
+        </tr>
+      </thead>
+      <tbody id="categoryTableBody"></tbody>
+      <tfoot id="categoryTableFoot"></tfoot>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-title"><h2 id="invoiceSectionTitle">Invoice detail</h2><span class="n" id="invoiceCount"></span></div>
+    <div class="filters">
+      <select id="filterCategory"><option value="">All categories</option></select>
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="Not due">Not due</option>
+        <option value="Due this month">Due this month</option>
+        <option value="Overdue">Overdue</option>
+        <option value="Paid">Paid</option>
+      </select>
+      <input type="text" id="filterVendor" placeholder="Search vendor or invoice #" />
+      <button id="clearFilters" style="font-family:var(--mono);font-size:12px;background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:8px 12px;border-radius:2px;cursor:pointer;">Clear</button>
+    </div>
+    <table id="invoiceTable">
+      <thead>
+        <tr>
+          <th>Vendor</th><th>Invoice #</th><th>Category</th><th>Invoice date</th><th>Due date</th>
+          <th class="num">Original</th><th class="num">Paid</th><th class="num">Balance</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceTableBody"></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span>Data source: Bill.com (synced via GitHub Actions) · vendor mapping: data/vendor-map.json</span>
+    <span id="generatedAt"></span>
+  </footer>
+
+</div>
+
+<script>
+const CATEGORY_COLORS = {
+  "Inventory": "#5B584E",
+  "Shipping & Fulfillment": "#8A6D3B",
+  "Advertising": "#A6432E",
+  "Sales & Marketing": "#6E5A9A",
+  "G&A / OPEX": "#3B6E4F",
+  "Unclassified": "#B9B5A7"
+};
+const AGING_KEYS = ["not_yet_due","due_this_month","overdue_lt_3m","overdue_gt_3m"];
+const AGING_LABELS = {not_yet_due:"Not due", due_this_month:"Due this month", overdue_lt_3m:"Overdue < 3m", overdue_gt_3m:"Overdue > 3m"};
+
+let DATA = null;
+let categoryChartInstance = null;
+let trendChartInstance = null;
+let activeCategory = null;
+
+function fmt(n){
+  return "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtShort(n){
+  return "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/* ---------- THEME ---------- */
+function setTheme(mode){
+  document.documentElement.setAttribute("data-theme", mode);
+  document.querySelectorAll(".theme-toggle button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode===mode);
+  });
+  localStorage.setItem("ap-theme", mode);
+  if (DATA) { renderCategoryChart(); renderTrendChart(); }
+}
+document.getElementById("themeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  setTheme(btn.dataset.mode);
+});
+setTheme(localStorage.getItem("ap-theme") || (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark":"light"));
+
+/* ---------- LOAD DATA ---------- */
+async function loadData(){
+  const res = await fetch("data/ap-data.json", {cache:"no-store"});
+  DATA = await res.json();
+  render();
+}
+
+function render(){
+  document.getElementById("heroTotal").textContent = Number(DATA.kpis.total_ap).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById("asOf").textContent = "As of " + new Date(DATA.generated_at).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("generatedAt").textContent = "Last sync: " + new Date(DATA.generated_at).toLocaleString("en-US");
+
+  renderBeam();
+  renderKpis();
+  renderCategoryChart();
+  renderTrendChart();
+  renderCategoryTable();
+  populateCategoryFilter();
+  renderInvoiceTable();
+  renderUnclassifiedBanner();
+}
+
+function renderBeam(){
+  const track = document.getElementById("beamTrack");
+  const legend = document.getElementById("beamLegend");
+  track.innerHTML = ""; legend.innerHTML = "";
+  const total = DATA.kpis.total_ap || 1;
+  const colors = {not_yet_due:"var(--accent-not-due)", due_this_month:"var(--accent-due)", overdue_lt_3m:"var(--accent-lt3)", overdue_gt_3m:"var(--accent-gt3)"};
+  AGING_KEYS.forEach(k=>{
+    const pct = (DATA.kpis[k]/total*100).toFixed(1);
+    const seg = document.createElement("div");
+    seg.className = "beam-seg";
+    seg.style.width = pct+"%";
+    seg.style.background = colors[k];
+    seg.title = AGING_LABELS[k]+": "+fmt(DATA.kpis[k]);
+    track.appendChild(seg);
+
+    const l = document.createElement("span");
+    l.innerHTML = `<span class="dot" style="background:${colors[k]}"></span>${AGING_LABELS[k]} · ${pct}%`;
+    legend.appendChild(l);
+  });
+}
+
+function renderKpis(){
+  const row = document.getElementById("kpiRow");
+  row.innerHTML = "";
+  const items = [
+    {k:"total", label:"Total AP", value:DATA.kpis.total_ap},
+    {k:"not_yet_due", label:"Not yet due", value:DATA.kpis.not_yet_due},
+    {k:"due_this_month", label:"Due this month", value:DATA.kpis.due_this_month},
+    {k:"overdue_lt_3m", label:"Overdue < 3 months", value:DATA.kpis.overdue_lt_3m},
+    {k:"overdue_gt_3m", label:"Overdue > 3 months", value:DATA.kpis.overdue_gt_3m},
+  ];
+  items.forEach(it=>{
+    const pct = it.k==="total" ? "" : ((it.value/DATA.kpis.total_ap)*100).toFixed(1)+"% of total";
+    const div = document.createElement("div");
+    div.className = "kpi"; div.dataset.k = it.k;
+    div.innerHTML = `<div class="kpi-label">${it.label}</div><div class="kpi-value">${fmt(it.value)}</div><div class="kpi-pct">${pct}</div>`;
+    row.appendChild(div);
+  });
+}
+
+function renderCategoryChart(){
+  const ctx = document.getElementById("categoryChart");
+  const ink = cssVar('--ink'), inkSoft = cssVar('--ink-soft'), line = cssVar('--line');
+  const labels = DATA.categories.map(c=>c.name);
+  const datasets = AGING_KEYS.map((k,i)=>({
+    label: AGING_LABELS[k],
+    data: DATA.categories.map(c=>c[k]),
+    backgroundColor: [cssVar('--accent-not-due'),cssVar('--accent-due'),cssVar('--accent-lt3'),cssVar('--accent-gt3')][i],
+    stack: "s"
+  }));
+  if(categoryChartInstance) categoryChartInstance.destroy();
+  categoryChartInstance = new Chart(ctx, {
+    type:"bar",
+    data:{labels, datasets},
+    options:{
+      responsive:true,
+      plugins:{ legend:{position:"bottom", labels:{color:inkSoft, font:{family:"IBM Plex Mono", size:10.5}}},
+        tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ${fmt(c.raw)}`}} },
+      scales:{
+        x:{stacked:true, ticks:{color:inkSoft, font:{family:"Inter", size:11}}, grid:{color:line}},
+        y:{stacked:true, ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}, callback:v=>fmtShort(v)}, grid:{color:line}}
+      }
+    }
+  });
+}
+
+function renderTrendChart(){
+  const ctx = document.getElementById("trendChart");
+  const ink = cssVar('--ink'), inkSoft = cssVar('--ink-soft'), line = cssVar('--line');
+  if(trendChartInstance) trendChartInstance.destroy();
+  trendChartInstance = new Chart(ctx, {
+    type:"line",
+    data:{
+      labels: DATA.monthly_trend.map(m=>m.month),
+      datasets:[{
+        label:"Total AP",
+        data: DATA.monthly_trend.map(m=>m.total_ap),
+        borderColor: ink, backgroundColor:"transparent", tension:.25, pointRadius:3
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>` ${fmt(c.raw)}`}}},
+      scales:{
+        x:{ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}}, grid:{color:line}},
+        y:{ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}, callback:v=>fmtShort(v)}, grid:{color:line}}
+      }
+    }
+  });
+}
+
+function renderCategoryTable(){
+  const body = document.getElementById("categoryTableBody");
+  const foot = document.getElementById("categoryTableFoot");
+  body.innerHTML = "";
+  DATA.categories.forEach(cat=>{
+    const tr = document.createElement("tr");
+    tr.dataset.category = cat.name;
+    if(activeCategory === cat.name) tr.classList.add("selected");
+    const total = cat.total || 1;
+    const barSegs = AGING_KEYS.map((k,i)=>{
+      const w = (cat[k]/total*100).toFixed(1);
+      const color = [cssVar('--accent-not-due'),cssVar('--accent-due'),cssVar('--accent-lt3'),cssVar('--accent-gt3')][i];
+      return `<span style="width:${w}%;background:${color}"></span>`;
+    }).join("");
+    tr.innerHTML = `
+      <td><span class="cat-name"><span class="cat-bar">${barSegs}</span>${cat.name}</span></td>
+      <td class="num">${fmt(cat.total)}</td>
+      <td class="num">${fmt(cat.not_yet_due)}</td>
+      <td class="num">${fmt(cat.due_this_month)}</td>
+      <td class="num">${fmt(cat.overdue_lt_3m)}</td>
+      <td class="num">${fmt(cat.overdue_gt_3m)}</td>
+    `;
+    tr.addEventListener("click", ()=>{
+      activeCategory = (activeCategory === cat.name) ? null : cat.name;
+      document.getElementById("filterCategory").value = activeCategory || "";
+      renderCategoryTable();
+      renderInvoiceTable();
+    });
+    body.appendChild(tr);
+  });
+
+  const totals = DATA.kpis;
+  foot.innerHTML = `<tr style="font-weight:600;">
+      <td>Total</td>
+      <td class="num">${fmt(totals.total_ap)}</td>
+      <td class="num">${fmt(totals.not_yet_due)}</td>
+      <td class="num">${fmt(totals.due_this_month)}</td>
+      <td class="num">${fmt(totals.overdue_lt_3m)}</td>
+      <td class="num">${fmt(totals.overdue_gt_3m)}</td>
+    </tr>`;
+}
+
+function populateCategoryFilter(){
+  const sel = document.getElementById("filterCategory");
+  sel.innerHTML = '<option value="">All categories</option>' +
+    DATA.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join("");
+  sel.addEventListener("change", ()=>{
+    activeCategory = sel.value || null;
+    renderCategoryTable();
+    renderInvoiceTable();
+  });
+  document.getElementById("filterStatus").addEventListener("change", renderInvoiceTable);
+  document.getElementById("filterVendor").addEventListener("input", renderInvoiceTable);
+  document.getElementById("clearFilters").addEventListener("click", ()=>{
+    activeCategory = null;
+    sel.value = "";
+    document.getElementById("filterStatus").value = "";
+    document.getElementById("filterVendor").value = "";
+    renderCategoryTable();
+    renderInvoiceTable();
+  });
+}
+
+function statusChipClass(status){
+  if(status==="Overdue") return "overdue";
+  if(status==="Due this month") return "due";
+  if(status==="Paid") return "paid";
+  return "notdue";
+}
+
+function renderInvoiceTable(){
+  const body = document.getElementById("invoiceTableBody");
+  const statusFilter = document.getElementById("filterStatus").value;
+  const vendorFilter = document.getElementById("filterVendor").value.toLowerCase();
+  const catFilter = activeCategory;
+
+  const rows = DATA.invoices.filter(inv=>{
+    if(catFilter && inv.category !== catFilter) return false;
+    if(statusFilter && inv.status !== statusFilter) return false;
+    if(vendorFilter && !(inv.vendor.toLowerCase().includes(vendorFilter) || inv.invoice_number.toLowerCase().includes(vendorFilter))) return false;
+    return true;
+  });
+
+  document.getElementById("invoiceSectionTitle").textContent = catFilter ? `Invoice detail — ${catFilter}` : "Invoice detail";
+  document.getElementById("invoiceCount").textContent = `${rows.length} invoice${rows.length===1?"":"s"}`;
+
+  body.innerHTML = rows.map(inv=>`
+    <tr>
+      <td>${inv.vendor}</td>
+      <td>${inv.invoice_number}</td>
+      <td>${inv.category}</td>
+      <td>${inv.invoice_date}</td>
+      <td>${inv.due_date}</td>
+      <td class="num">${fmt(inv.original_amount)}</td>
+      <td class="num">${fmt(inv.amount_paid)}</td>
+      <td class="num">${fmt(inv.remaining_balance)}</td>
+      <td><span class="status-chip ${statusChipClass(inv.status)}">${inv.status}</span></td>
+    </tr>
+  `).join("") || `<tr><td colspan="9" style="color:var(--ink-soft);font-style:italic;">No invoices match these filters.</td></tr>`;
+}
+
+function renderUnclassifiedBanner(){
+  const banner = document.getElementById("unclassifiedBanner");
+  const unclassified = DATA.categories.find(c=>c.name==="Unclassified");
+  if(unclassified && unclassified.total > 0){
+    banner.style.display = "block";
+    banner.textContent = `⚠ ${fmt(unclassified.total)} sits in Unclassified — add these vendors to data/vendor-map.json so they roll into the right category.`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
