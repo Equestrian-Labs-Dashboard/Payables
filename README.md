@@ -1,29 +1,63 @@
 # Accounts Payable Dashboard — QuickBooks Online
 
-The dashboard UI is unchanged. The data source is now **QuickBooks Online**.
-If BILL is already synchronized with QuickBooks, this repository does **not** connect to the BILL API.
+The dashboard design remains unchanged. The data source is **QuickBooks Online**.
+If BILL is already synchronized with QuickBooks, this repository does **not** need the BILL API.
 
 ## Data flow
 
 `BILL -> QuickBooks Online -> QBO Accounting API -> GitHub Actions -> data/ap-data.json -> GitHub Pages`
 
-## Repository secrets
+## GitHub secrets
 
-Create these under **Settings -> Secrets and variables -> Actions -> Repository secrets**:
+Go to:
+
+`Repository -> Settings -> Secrets and variables -> Actions -> Secrets -> New repository secret`
+
+Create exactly these four repository secrets:
 
 - `QBO_CLIENT_ID`
 - `QBO_CLIENT_SECRET`
 - `QBO_REALM_ID`
 - `QBO_REFRESH_TOKEN`
 
-Under **Variables**, create:
+Do **not** put quotes around their values.
 
-- `QBO_ENVIRONMENT` = `sandbox` while using Development credentials.
-- Change it to `production` only when Intuit has issued Production credentials and the real QBO company has authorized the app.
+## GitHub variable
 
-> Development credentials only connect to Intuit sandbox companies. They cannot read the real company file.
+Go to:
 
-## Source and classification logic
+`Repository -> Settings -> Secrets and variables -> Actions -> Variables -> New repository variable`
+
+Create:
+
+- Name: `QBO_ENVIRONMENT`
+- Value: `sandbox`
+
+Use `sandbox` while the Intuit app uses Development credentials.
+Change it to `production` only after Production credentials are available and the real QuickBooks company has authorized the app.
+
+## GitHub Pages setting
+
+Go to:
+
+`Repository -> Settings -> Pages`
+
+Set:
+
+- **Source:** `GitHub Actions`
+
+The workflow declares the required `github-pages` deployment environment automatically.
+
+## Files used by the integration
+
+- `.github/workflows/update-ap-data.yml` — scheduled/manual data refresh + Pages deployment.
+- `scripts/quickbooks_client.py` — OAuth refresh and QuickBooks API queries.
+- `scripts/transform.py` — converts open QBO Bills into dashboard JSON.
+- `scripts/requirements.txt` — Python dependency list.
+- `data/vendor-map.json` — fallback classification only when QBO accounting detail is insufficient.
+- `data/ap-data.json` — generated dashboard data.
+
+## QuickBooks data used
 
 The pipeline reads open QuickBooks `Bill` transactions (`Balance > 0`) and resolves:
 
@@ -33,28 +67,18 @@ The pipeline reads open QuickBooks `Bill` transactions (`Balance > 0`) and resol
 - Due date (`DueDate`)
 - Original amount (`TotalAmt`)
 - Outstanding balance (`Balance`)
-- Accounting detail from `AccountBasedExpenseLineDetail` or the expense account associated with item lines
+- Expense/item accounting detail from each bill line
 
-Accounting account names are used first to classify AP into:
+Account names are used first to classify AP. Vendor mapping is only a fallback.
 
-- Inventory
-- Shipping & Fulfillment
-- Advertising
-- Sales & Marketing
-- G&A / OPEX
-- Unclassified
+## Run a test
 
-`data/vendor-map.json` remains only as a fallback when a bill does not expose enough accounting detail.
+1. Add all four QBO secrets.
+2. Add `QBO_ENVIRONMENT=sandbox` under **Variables**.
+3. Ensure the `QBO_REALM_ID` and `QBO_REFRESH_TOKEN` belong to the same sandbox company authorized with the Development app.
+4. Go to **Actions -> Update AP Dashboard Data -> Run workflow**.
+5. Confirm both jobs are green:
+   - `Update data from QuickBooks`
+   - `Deploy GitHub Pages`
 
-## First test
-
-1. Add the four QBO secrets.
-2. Set repository variable `QBO_ENVIRONMENT=sandbox`.
-3. Authorize a QuickBooks sandbox company and obtain its `realmId` + refresh token.
-4. Run **Actions -> Update AP Dashboard Data -> Run workflow**.
-
-For the real Corro/Cavali company, repeat the OAuth authorization with **Production** credentials and set `QBO_ENVIRONMENT=production`.
-
-## OAuth token note
-
-QuickBooks can return a new refresh token during refresh. For a durable unattended production integration, the latest refresh token should be persisted securely. The current workflow is ready for initial testing with a GitHub Secret; production token persistence should be finalized when Production access is available.
+If OAuth fails, check that the Client ID, Client Secret, Realm ID and Refresh Token all belong to the same Intuit Development app/sandbox authorization.

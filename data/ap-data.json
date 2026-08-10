@@ -1,146 +1,37 @@
 {
-  "generated_at": "2026-08-10T02:36:55.057233Z",
+  "generated_at": "2026-08-05T09:00:00Z",
   "currency": "USD",
-  "source": "quickbooks_online",
-  "company": "Sandbox Company US c741",
+  "source": "sample-data",
   "kpis": {
-    "total_ap": 1602.67,
-    "not_yet_due": 0.0,
-    "due_this_month": 0.0,
-    "overdue_lt_3m": 1602.67,
-    "overdue_gt_3m": 0.0
+    "total_ap": 260430.50,
+    "not_yet_due": 118200.00,
+    "due_this_month": 61540.75,
+    "overdue_lt_3m": 54890.25,
+    "overdue_gt_3m": 25799.50
   },
   "categories": [
-    {
-      "name": "Inventory",
-      "total": 205.0,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 205.0,
-      "overdue_gt_3m": 0.0
-    },
-    {
-      "name": "Shipping & Fulfillment",
-      "total": 0.0,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 0.0,
-      "overdue_gt_3m": 0.0
-    },
-    {
-      "name": "Advertising",
-      "total": 0.0,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 0.0,
-      "overdue_gt_3m": 0.0
-    },
-    {
-      "name": "Sales & Marketing",
-      "total": 0.0,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 0.0,
-      "overdue_gt_3m": 0.0
-    },
-    {
-      "name": "G&A / OPEX",
-      "total": 642.67,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 642.67,
-      "overdue_gt_3m": 0.0
-    },
-    {
-      "name": "Unclassified",
-      "total": 755.0,
-      "not_yet_due": 0.0,
-      "due_this_month": 0.0,
-      "overdue_lt_3m": 755.0,
-      "overdue_gt_3m": 0.0
-    }
+    { "name": "Inventory",             "total": 132500.00, "not_yet_due": 71000.00, "due_this_month": 32000.00, "overdue_lt_3m": 22500.00, "overdue_gt_3m": 7000.00 },
+    { "name": "Shipping & Fulfillment","total": 48900.50,  "not_yet_due": 21200.00, "due_this_month": 14300.75, "overdue_lt_3m": 9899.75,  "overdue_gt_3m": 3500.00 },
+    { "name": "Advertising",           "total": 39830.00,  "not_yet_due": 15000.00, "due_this_month": 9740.00,  "overdue_lt_3m": 10590.00, "overdue_gt_3m": 4500.00 },
+    { "name": "Sales & Marketing",     "total": 18200.00,  "not_yet_due": 6500.00,  "due_this_month": 4500.00,  "overdue_lt_3m": 5900.00,  "overdue_gt_3m": 1300.00 },
+    { "name": "G&A / OPEX",            "total": 19000.00,  "not_yet_due": 3500.00,  "due_this_month": 1000.00,  "overdue_lt_3m": 5000.50,  "overdue_gt_3m": 9499.50 },
+    { "name": "Unclassified",          "total": 2000.00,   "not_yet_due": 1000.00,  "due_this_month": 0.00,     "overdue_lt_3m": 1000.00,  "overdue_gt_3m": 0.00 }
   ],
-  "monthly_trend": [],
+  "monthly_trend": [
+    { "month": "2026-03", "total_ap": 231400.00 },
+    { "month": "2026-04", "total_ap": 244900.00 },
+    { "month": "2026-05", "total_ap": 252300.00 },
+    { "month": "2026-06", "total_ap": 248750.00 },
+    { "month": "2026-07", "total_ap": 257100.00 },
+    { "month": "2026-08", "total_ap": 260430.50 }
+  ],
   "invoices": [
-    {
-      "id": "78",
-      "vendor": "PG&E",
-      "invoice_number": "",
-      "invoice_date": "2026-04-14",
-      "due_date": "2026-05-14",
-      "category": "G&A / OPEX",
-      "account_labels": [
-        "Utilities:Gas and Electric"
-      ],
-      "original_amount": 86.44,
-      "amount_paid": 0.0,
-      "remaining_balance": 86.44,
-      "days_overdue": 88,
-      "status": "Overdue"
-    },
-    {
-      "id": "108",
-      "vendor": "Robertson & Associates",
-      "invoice_number": "",
-      "invoice_date": "2026-05-29",
-      "due_date": "2026-05-29",
-      "category": "G&A / OPEX",
-      "account_labels": [
-        "Legal & Professional Fees:Accounting"
-      ],
-      "original_amount": 315.0,
-      "amount_paid": 0.0,
-      "remaining_balance": 315.0,
-      "days_overdue": 73,
-      "status": "Overdue"
-    },
-    {
-      "id": "126",
-      "vendor": "Norton Lumber and Building Materials",
-      "invoice_number": "",
-      "invoice_date": "2026-05-29",
-      "due_date": "2026-05-29",
-      "category": "Inventory",
-      "account_labels": [
-        "Cost of Goods Sold"
-      ],
-      "original_amount": 205.0,
-      "amount_paid": 0.0,
-      "remaining_balance": 205.0,
-      "days_overdue": 73,
-      "status": "Overdue"
-    },
-    {
-      "id": "19",
-      "vendor": "Brosnahan Insurance Agency",
-      "invoice_number": "",
-      "invoice_date": "2026-05-22",
-      "due_date": "2026-06-01",
-      "category": "G&A / OPEX",
-      "account_labels": [
-        "Insurance"
-      ],
-      "original_amount": 241.23,
-      "amount_paid": 0.0,
-      "remaining_balance": 241.23,
-      "days_overdue": 70,
-      "status": "Overdue"
-    },
-    {
-      "id": "44",
-      "vendor": "Diego's Road Warrior Bodyshop",
-      "invoice_number": "",
-      "invoice_date": "2026-05-27",
-      "due_date": "2026-06-26",
-      "category": "Unclassified",
-      "account_labels": [
-        "Maintenance and Repair:Equipment Repairs"
-      ],
-      "original_amount": 755.0,
-      "amount_paid": 0.0,
-      "remaining_balance": 755.0,
-      "days_overdue": 45,
-      "status": "Overdue"
-    }
+    { "vendor": "Meta Platforms",     "invoice_number": "INV-10234", "invoice_date": "2026-07-02", "due_date": "2026-08-01", "category": "Advertising", "original_amount": 12500.00, "amount_paid": 0.00, "remaining_balance": 12500.00, "days_overdue": 4, "status": "Overdue" },
+    { "vendor": "Google Ads",         "invoice_number": "INV-10240", "invoice_date": "2026-07-05", "due_date": "2026-09-05", "category": "Advertising", "original_amount": 9800.00,  "amount_paid": 0.00, "remaining_balance": 9800.00,  "days_overdue": 0, "status": "Not due" },
+    { "vendor": "ShipStation",        "invoice_number": "INV-10201", "invoice_date": "2026-06-15", "due_date": "2026-07-15", "category": "Shipping & Fulfillment", "original_amount": 6200.75, "amount_paid": 2000.00, "remaining_balance": 4200.75, "days_overdue": 21, "status": "Overdue" },
+    { "vendor": "Equine Supply Co.",  "invoice_number": "INV-10188", "invoice_date": "2026-05-20", "due_date": "2026-06-19", "category": "Inventory", "original_amount": 41000.00, "amount_paid": 41000.00, "remaining_balance": 0.00, "days_overdue": 0, "status": "Paid" },
+    { "vendor": "Notaria de Fe Publica Nro 17", "invoice_number": "INV-10099", "invoice_date": "2026-04-01", "due_date": "2026-05-01", "category": "G&A / OPEX", "original_amount": 9499.50, "amount_paid": 0.00, "remaining_balance": 9499.50, "days_overdue": 96, "status": "Overdue" },
+    { "vendor": "Warehouse Partners", "invoice_number": "INV-10250", "invoice_date": "2026-07-20", "due_date": "2026-08-20", "category": "Shipping & Fulfillment", "original_amount": 14300.75, "amount_paid": 0.00, "remaining_balance": 14300.75, "days_overdue": 0, "status": "Due this month" },
+    { "vendor": "Unmapped Vendor LLC","invoice_number": "INV-10260", "invoice_date": "2026-07-25", "due_date": "2026-08-25", "category": "Unclassified", "original_amount": 1000.00, "amount_paid": 0.00, "remaining_balance": 1000.00, "days_overdue": 0, "status": "Not due" }
   ]
 }
