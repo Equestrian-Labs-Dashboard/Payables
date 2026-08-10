@@ -1,17 +1,17 @@
-"""QuickBooks Online API client for the AP dashboard.
+"""QuickBooks Online API client for the Accounts Payable dashboard.
 
-Required environment variables:
+Required GitHub Actions secrets:
     QBO_CLIENT_ID
     QBO_CLIENT_SECRET
     QBO_REALM_ID
     QBO_REFRESH_TOKEN
 
-Optional:
-    QBO_ENVIRONMENT=production|sandbox   (default: sandbox)
-    QBO_MINOR_VERSION                    (optional API minor version)
+Optional repository variable:
+    QBO_ENVIRONMENT=sandbox|production  (default: sandbox)
 
-Development credentials can only access QuickBooks sandbox companies.
-Production credentials are required for a real QuickBooks Online company.
+The dashboard reads AP from QuickBooks Online. If BILL is already synchronized
+with QBO, the BILL activity will be reflected in QBO and no BILL API credential
+is required by this repository.
 """
 
 import os
@@ -42,26 +42,21 @@ class QuickBooksClient:
             raise ValueError("QBO_ENVIRONMENT must be 'sandbox' or 'production'")
 
         missing = [
-            name
-            for name, value in [
+            name for name, value in [
                 ("QBO_CLIENT_ID", self.client_id),
                 ("QBO_CLIENT_SECRET", self.client_secret),
                 ("QBO_REALM_ID", self.realm_id),
                 ("QBO_REFRESH_TOKEN", self.refresh_token),
-            ]
-            if not value
+            ] if not value
         ]
         if missing:
-            raise RuntimeError(
-                "Missing QuickBooks environment variables: " + ", ".join(missing)
-            )
+            raise RuntimeError("Missing QuickBooks environment variables: " + ", ".join(missing))
 
     @property
     def api_base(self) -> str:
         return API_BASES[self.environment]
 
     def refresh_access_token(self) -> str:
-        """Exchange the refresh token for a fresh access token."""
         response = requests.post(
             TOKEN_URL,
             auth=(self.client_id, self.client_secret),
@@ -69,10 +64,7 @@ class QuickBooksClient:
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": self.refresh_token,
-            },
+            data={"grant_type": "refresh_token", "refresh_token": self.refresh_token},
             timeout=30,
         )
         if not response.ok:
@@ -99,7 +91,6 @@ class QuickBooksClient:
         url = f"{self.api_base}{path}"
         response = requests.get(url, headers=self._headers(), params=params, timeout=60)
         if response.status_code == 401:
-            # One retry with a newly refreshed access token.
             self.access_token = None
             response = requests.get(url, headers=self._headers(), params=params, timeout=60)
         if not response.ok:
@@ -117,12 +108,8 @@ class QuickBooksClient:
         rows: List[dict] = []
         start = 1
         where_clause = f" WHERE {where}" if where else ""
-
         while True:
-            q = (
-                f"SELECT * FROM {entity}{where_clause} "
-                f"STARTPOSITION {start} MAXRESULTS {page_size}"
-            )
+            q = f"SELECT * FROM {entity}{where_clause} STARTPOSITION {start} MAXRESULTS {page_size}"
             result = self.query(q)
             page = result.get(entity, [])
             rows.extend(page)
@@ -131,14 +118,17 @@ class QuickBooksClient:
             start += page_size
         return rows
 
-    def get_open_bills(self) -> List[dict]:
-        """Return QBO Bills that still have an outstanding balance."""
-        # Balance filtering is kept in Python for compatibility across QBO query behavior.
-        return [
-            bill
-            for bill in self._query_all("Bill")
-            if float(bill.get("Balance", 0) or 0) > 0
-        ]
+    def get_bills(self) -> List[dict]:
+        """All QBO bills. Open bills feed KPIs; paid bills remain available for drill-down filters."""
+        return self._query_all("Bill")
+
+    def get_vendor_credits(self) -> List[dict]:
+        """Vendor credits are reported separately and are not subtracted until applied in QBO."""
+        try:
+            return self._query_all("VendorCredit")
+        except requests.HTTPError as exc:
+            print(f"[quickbooks] VendorCredit query skipped: {exc}", file=sys.stderr)
+            return []
 
     def get_accounts(self) -> Dict[str, dict]:
         return {str(x.get("Id")): x for x in self._query_all("Account") if x.get("Id")}
@@ -153,8 +143,8 @@ class QuickBooksClient:
 
 if __name__ == "__main__":
     client = QuickBooksClient()
-    bills = client.get_open_bills()
+    bills = client.get_bills()
     company = client.get_company_info()
     print(f"Environment: {client.environment}")
     print(f"Company: {company.get('CompanyName', client.realm_id)}")
-    print(f"Open bills: {len(bills)}")
+    print(f"Bills: {len(bills)}")

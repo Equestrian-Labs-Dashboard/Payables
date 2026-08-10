@@ -1,548 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Accounts Payable — Ledger</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accounts Payable Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#F7F6F2;
-    --panel:#FFFFFF;
-    --panel-2:#F0EFEA;
-    --ink:#15140F;
-    --ink-soft:#5B584E;
-    --line:#DEDBD1;
-    --accent-not-due:#5B584E;
-    --accent-due:#9A6B12;
-    --accent-lt3:#A6432E;
-    --accent-gt3:#7A1F14;
-    --accent-ok:#3B6E4F;
-    --serif:'Fraunces', Georgia, serif;
-    --sans:'Inter', -apple-system, sans-serif;
-    --mono:'IBM Plex Mono', 'Courier New', monospace;
-    --radius:2px;
-    --shadow: 0 1px 0 rgba(21,20,15,0.06);
-  }
-  html[data-theme="dark"]{
-    --bg:#0C0C0B;
-    --panel:#151512;
-    --panel-2:#1C1B17;
-    --ink:#EEEBE2;
-    --ink-soft:#9A968A;
-    --line:#302E28;
-    --accent-not-due:#B9B5A7;
-    --accent-due:#D9A441;
-    --accent-lt3:#E0715A;
-    --accent-gt3:#F0503B;
-    --accent-ok:#6FBF8F;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--sans);
-    -webkit-font-smoothing:antialiased;
-    transition:background .25s ease, color .25s ease;
-  }
-  .wrap{max-width:1180px;margin:0 auto;padding:32px 28px 80px;}
-
-  /* ===== Header ===== */
-  header.top{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    border-bottom:1px solid var(--line);
-    padding-bottom:20px;margin-bottom:36px;
-    gap:24px; flex-wrap:wrap;
-  }
-  .brand-eyebrow{
-    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-soft); margin:0 0 6px;
-  }
-  h1{
-    font-family:var(--serif);font-weight:500;font-size:38px;margin:0;
-    letter-spacing:-.01em;
-  }
-  .theme-toggle{
-    display:flex;align-items:center;gap:10px;
-    border:1px solid var(--line);border-radius:999px;padding:6px 6px;
-    background:var(--panel);cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-soft);
-  }
-  .theme-toggle button{
-    all:unset;cursor:pointer;width:30px;height:30px;border-radius:999px;
-    display:flex;align-items:center;justify-content:center;font-size:15px;
-  }
-  .theme-toggle button.active{background:var(--panel-2);}
-  .as-of{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:6px;}
-
-  /* ===== Hero ===== */
-  .hero{
-    display:grid;grid-template-columns:1.1fr 1fr;gap:40px;
-    padding:28px 0 40px; border-bottom:1px solid var(--line); margin-bottom:32px;
-    align-items:end;
-  }
-  .hero-label{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;}
-  .hero-figure{
-    font-family:var(--serif);font-weight:500;font-size:76px;line-height:1;letter-spacing:-.02em;
-  }
-  .hero-figure sup{font-size:28px;font-weight:400;color:var(--ink-soft);top:-.6em;}
-  .hero-sub{font-size:14px;color:var(--ink-soft);margin-top:12px;max-width:38ch;line-height:1.5;}
-  .ledger-beam{width:100%;}
-  .beam-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-bottom:6px;}
-  .beam-track{
-    display:flex;width:100%;height:34px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
-  }
-  .beam-seg{height:100%;position:relative;}
-  .beam-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;}
-  .beam-legend span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
-  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-
-  /* ===== KPI cards ===== */
-  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:40px;}
-  .kpi{background:var(--panel);padding:20px 18px;position:relative;}
-  .kpi::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;}
-  .kpi[data-k="total"]::before{background:var(--ink);}
-  .kpi[data-k="not_yet_due"]::before{background:var(--accent-not-due);}
-  .kpi[data-k="due_this_month"]::before{background:var(--accent-due);}
-  .kpi[data-k="overdue_lt_3m"]::before{background:var(--accent-lt3);}
-  .kpi[data-k="overdue_gt_3m"]::before{background:var(--accent-gt3);}
-  .kpi-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
-  .kpi-value{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.01em;}
-  .kpi-pct{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:4px;}
-
-  /* ===== Section titles ===== */
-  .section-title{
-    display:flex;align-items:baseline;gap:12px;margin:0 0 18px;
-  }
-  .section-title h2{font-family:var(--serif);font-size:21px;font-weight:500;margin:0;}
-  .section-title .n{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
-  section{margin-bottom:48px;}
-
-  /* ===== Charts grid ===== */
-  .charts-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);}
-  .chart-card{background:var(--panel);padding:22px;}
-  .chart-card h3{font-family:var(--sans);font-weight:600;font-size:13px;margin:0 0 16px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
-  canvas{max-width:100%;}
-
-  /* ===== Filters ===== */
-  .filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
-  .filters select, .filters input{
-    font-family:var(--mono);font-size:12px;background:var(--panel);color:var(--ink);
-    border:1px solid var(--line);padding:8px 10px;border-radius:var(--radius);
-  }
-  .filters input[type="text"]{min-width:200px;}
-
-  /* ===== Table ===== */
-  table{width:100%;border-collapse:collapse;background:var(--panel);}
-  thead th{
-    text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
-    color:var(--ink-soft);border-bottom:1px solid var(--line);padding:10px 12px;font-weight:500;
-  }
-  tbody td{padding:12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle;}
-  tbody tr{cursor:pointer;}
-  tbody tr:hover{background:var(--panel-2);}
-  tbody tr.selected{background:var(--panel-2);}
-  td.num, th.num{font-family:var(--mono);text-align:right;}
-  .cat-bar{display:inline-flex;height:6px;width:110px;border-radius:2px;overflow:hidden;vertical-align:middle;margin-right:8px;border:1px solid var(--line);}
-  .cat-bar span{height:100%;display:block;}
-  .cat-name{display:flex;align-items:center;font-weight:500;}
-  .status-chip{
-    font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);
-    text-transform:uppercase;letter-spacing:.03em;
-  }
-  .status-chip.overdue{color:var(--accent-lt3);border-color:var(--accent-lt3);}
-  .status-chip.due{color:var(--accent-due);border-color:var(--accent-due);}
-  .status-chip.notdue{color:var(--ink-soft);}
-  .status-chip.paid{color:var(--accent-ok);border-color:var(--accent-ok);}
-
-  .unclassified-banner{
-    display:none;
-    font-family:var(--mono);font-size:12px;background:var(--panel-2);border:1px solid var(--line);
-    padding:12px 16px;margin-bottom:20px;border-left:3px solid var(--accent-due);
-  }
-
-  footer{
-    margin-top:60px;padding-top:20px;border-top:1px solid var(--line);
-    font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
-  }
-
-  @media (max-width:900px){
-    .kpi-row{grid-template-columns:repeat(2,1fr);}
-    .hero{grid-template-columns:1fr;}
-    .charts-grid{grid-template-columns:1fr;}
-  }
+:root{
+  --bg:#f5f7fa;--card:#fff;--text:#172033;--muted:#6c7689;--line:#e4e8ef;
+  --navy:#243b5a;--blue:#4f7ea8;--amber:#d69b31;--orange:#d96f4b;--red:#ba493f;
+  --green:#4c8a69;--soft:#eef2f6;--shadow:0 8px 26px rgba(29,42,62,.06);
+}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',Arial,sans-serif;font-size:14px}
+.shell{max-width:1460px;margin:auto;padding:28px 30px 60px}
+.topbar{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:24px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+h1{font-size:30px;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.025em}.subtitle{color:var(--muted);margin-top:7px;line-height:1.5}.meta{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:12px;box-shadow:0 2px 10px rgba(29,42,62,.03)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:18px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);min-height:132px}.kpi .label{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;min-height:31px}.kpi .value{font-size:26px;font-weight:700;letter-spacing:-.03em;margin-top:8px}.kpi .hint{font-size:12px;color:var(--muted);margin-top:6px}.kpi.total{border-top:4px solid var(--navy)}.kpi.notdue{border-top:4px solid var(--blue)}.kpi.month{border-top:4px solid var(--amber)}.kpi.lt3{border-top:4px solid var(--orange)}.kpi.gt3{border-top:4px solid var(--red)}
+.alert-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}.alert-item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.alert-item b{display:block;font-size:17px;margin-bottom:2px}.alert-item span{font-size:11px;color:var(--muted)}
+.section{margin-top:24px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px}.section-head h2{font-size:18px;margin:0}.section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.grid-2{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.grid-3{display:grid;grid-template-columns:1.05fr .95fr 1fr;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:18px}.card-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}.card-title h3{margin:0;font-size:13px}.card-title small{color:var(--muted);font-size:11px}
+.aging-bar{height:20px;border-radius:7px;display:flex;overflow:hidden;background:var(--soft)}.aging-bar span{height:100%}.legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:13px;color:var(--muted);font-size:11px}.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.notdue-bg{background:var(--blue)}.month-bg{background:var(--amber)}.lt3-bg{background:var(--orange)}.gt3-bg{background:var(--red)}
+.hbars{display:flex;flex-direction:column;gap:12px}.hrow{display:grid;grid-template-columns:155px 1fr 95px;gap:10px;align-items:center}.hlabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#3d4657;font-size:12px}.track{height:10px;background:var(--soft);border-radius:999px;overflow:hidden}.fill{height:100%;background:var(--navy);border-radius:999px}.hvalue{text-align:right;font-weight:600;font-size:12px}
+.trend{height:190px;display:flex;align-items:flex-end;gap:10px;padding-top:14px}.tcol{flex:1;min-width:0;text-align:center}.tbar-wrap{height:142px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--line)}.tbar{width:70%;background:var(--navy);border-radius:5px 5px 0 0;min-height:2px}.tval{font-size:10px;color:var(--muted);margin-bottom:5px;white-space:nowrap}.tmonth{font-size:10px;color:var(--muted);margin-top:6px}
+.upcoming{display:flex;flex-direction:column;gap:9px}.up-item{display:grid;grid-template-columns:74px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:9px}.up-item:last-child{border-bottom:0}.date-badge{background:var(--soft);border-radius:7px;padding:6px 7px;text-align:center;font-size:11px}.vendor{font-weight:600;font-size:12px}.sub{color:var(--muted);font-size:11px;margin-top:2px}.amt{font-weight:700;font-size:12px}
+.filters{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:10px;margin-bottom:12px}.filters select,.filters input{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);padding:0 10px;font-family:inherit;font-size:12px}.filter-actions{display:flex;gap:8px;margin-bottom:14px}.btn{border:1px solid var(--line);background:#fff;border-radius:8px;height:34px;padding:0 12px;font-family:inherit;font-size:12px;cursor:pointer}.btn:hover{background:var(--soft)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:980px}th{background:#f8fafc;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);position:sticky;top:0}td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}tr:last-child td{border-bottom:0}tbody tr:hover{background:#fafbfd}.num{text-align:right;font-variant-numeric:tabular-nums}.cat-link{font-weight:600;color:var(--navy);cursor:pointer}.status{display:inline-block;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700}.s-paid{background:#edf7f1;color:var(--green)}.s-overdue{background:#faece9;color:var(--red)}.s-due{background:#fff4df;color:#a56c07}.s-not{background:#edf2f8;color:var(--blue)}.flag{display:inline-block;background:#fff1ed;color:#a94f35;border-radius:5px;padding:2px 5px;font-size:9px;margin-left:4px}
+.summary-total td{font-weight:700;background:#f8fafc}.empty{padding:34px;text-align:center;color:var(--muted)}
+.quality{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.q{padding:12px;border:1px solid var(--line);border-radius:9px;background:#fafbfd}.q b{display:block;font-size:16px}.q span{font-size:10px;color:var(--muted)}
+.footer{margin-top:30px;color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi.total{grid-column:span 2}.grid-2,.grid-3{grid-template-columns:1fr}.filters{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.shell{padding:20px 14px 50px}.topbar{display:block}.meta{justify-content:flex-start;margin-top:14px}.kpis{grid-template-columns:1fr}.kpi.total{grid-column:auto}.alert-strip,.quality{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}.hrow{grid-template-columns:120px 1fr 75px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <header class="top">
-    <div>
-      <p class="brand-eyebrow">Corro · Cavali — Finance</p>
-      <h1>Accounts Payable</h1>
-      <p class="as-of" id="asOf">As of —</p>
-    </div>
-    <div class="theme-toggle" id="themeToggle">
-      <button data-mode="light" title="Light mode">☀️</button>
-      <button data-mode="dark" title="Dark mode">🌙</button>
-    </div>
+<div class="shell">
+  <header class="topbar">
+    <div><div class="eyebrow">Corro · Cavali · Finance</div><h1>Accounts Payable Dashboard</h1><div class="subtitle">Executive view of outstanding bills, aging, expense concentration and payments requiring attention.</div></div>
+    <div class="meta"><span class="pill" id="asOf">Loading…</span><span class="pill" id="sourcePill">QuickBooks Online</span></div>
   </header>
 
-  <div class="hero">
-    <div>
-      <p class="hero-label">Total outstanding</p>
-      <div class="hero-figure"><sup>$</sup><span id="heroTotal">0</span></div>
-      <p class="hero-sub">Everything currently owed to vendors across Corro and Cavali, pulled from Bill.com. Segmented below by how urgently it needs attention.</p>
-    </div>
-    <div>
-      <div class="ledger-beam">
-        <div class="beam-label"><span>Not due</span><span>Overdue &gt; 3 months</span></div>
-        <div class="beam-track" id="beamTrack"></div>
-        <div class="beam-legend" id="beamLegend"></div>
-      </div>
-    </div>
+  <section class="kpis">
+    <div class="kpi total"><div class="label">Total Accounts Payable</div><div class="value" id="kTotal">—</div><div class="hint" id="kTotalHint">Outstanding balance</div></div>
+    <div class="kpi notdue"><div class="label">Not Yet Due</div><div class="value" id="kNotDue">—</div><div class="hint" id="pNotDue">—</div></div>
+    <div class="kpi month"><div class="label">Due This Month</div><div class="value" id="kMonth">—</div><div class="hint" id="pMonth">—</div></div>
+    <div class="kpi lt3"><div class="label">Overdue &lt; 3 Months</div><div class="value" id="kLt3">—</div><div class="hint" id="pLt3">—</div></div>
+    <div class="kpi gt3"><div class="label">Overdue &gt; 3 Months</div><div class="value" id="kGt3">—</div><div class="hint" id="pGt3">—</div></div>
+  </section>
+
+  <div class="alert-strip">
+    <div class="alert-item"><b id="openCount">—</b><span>Open bills</span></div>
+    <div class="alert-item"><b id="criticalCount">—</b><span>Bills overdue &gt; 90 days</span></div>
+    <div class="alert-item"><b id="unclassifiedCount">—</b><span>Open bills to classify</span></div>
+    <div class="alert-item"><b id="creditsValue">—</b><span>Available vendor credits (not netted until applied)</span></div>
   </div>
 
-  <section>
-    <div class="kpi-row" id="kpiRow"></div>
-  </section>
-
-  <section>
-    <div class="section-title"><h2>Where the balance sits</h2><span class="n">by expense category</span></div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h3>Category × Aging</h3>
-        <canvas id="categoryChart" height="220"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Total AP — 6 month trend</h3>
-        <canvas id="trendChart" height="220"></canvas>
-      </div>
+  <section class="section">
+    <div class="section-head"><div><h2>Executive AP position</h2><p>How the current outstanding balance is distributed and where it is concentrated.</p></div></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title"><h3>Aging of outstanding AP</h3><small>Current open balance</small></div><div class="aging-bar" id="agingBar"></div><div class="legend" id="agingLegend"></div></div>
+      <div class="card"><div class="card-title"><h3>Top vendor concentration</h3><small>Open balance</small></div><div class="hbars" id="vendorBars"></div></div>
     </div>
   </section>
 
-  <section>
-    <div class="section-title"><h2>Category summary</h2><span class="n">click a row to drill into invoices</span></div>
-    <div class="unclassified-banner" id="unclassifiedBanner"></div>
-    <table id="categoryTable">
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th class="num">Total</th>
-          <th class="num">Not due</th>
-          <th class="num">Due this month</th>
-          <th class="num">&lt; 3 months</th>
-          <th class="num">&gt; 3 months</th>
-        </tr>
-      </thead>
-      <tbody id="categoryTableBody"></tbody>
-      <tfoot id="categoryTableFoot"></tfoot>
-    </table>
+  <section class="section">
+    <div class="grid-3">
+      <div class="card"><div class="card-title"><h3>AP by expense category</h3><small>Click category to drill down</small></div><div class="hbars" id="categoryBars"></div></div>
+      <div class="card"><div class="card-title"><h3>6-month AP trend</h3><small>Month-end/latest snapshot</small></div><div class="trend" id="trend"></div></div>
+      <div class="card"><div class="card-title"><h3>Payments needing attention</h3><small>Oldest / nearest due</small></div><div class="upcoming" id="attentionList"></div></div>
+    </div>
   </section>
 
-  <section>
-    <div class="section-title"><h2 id="invoiceSectionTitle">Invoice detail</h2><span class="n" id="invoiceCount"></span></div>
+  <section class="section">
+    <div class="section-head"><div><h2>Category summary</h2><p>Executive breakdown of open AP by expense type and aging.</p></div></div>
+    <div class="card" style="padding:0"><div class="table-wrap" style="border:0"><table><thead><tr><th>Category</th><th class="num">Total pending</th><th class="num">Not yet due</th><th class="num">Due this month</th><th class="num">&lt; 3 months</th><th class="num">&gt; 3 months</th></tr></thead><tbody id="categoryTable"></tbody></table></div></div>
+  </section>
+
+  <section class="section" id="detailSection">
+    <div class="section-head"><div><h2>Invoice detail</h2><p>Use filters or click a category above to review vendor-level detail.</p></div><div id="resultCount" class="pill">—</div></div>
     <div class="filters">
-      <select id="filterCategory"><option value="">All categories</option></select>
-      <select id="filterStatus">
-        <option value="">All statuses</option>
-        <option value="Not due">Not due</option>
-        <option value="Due this month">Due this month</option>
-        <option value="Overdue">Overdue</option>
-        <option value="Paid">Paid</option>
-      </select>
-      <input type="text" id="filterVendor" placeholder="Search vendor or invoice #" />
-      <button id="clearFilters" style="font-family:var(--mono);font-size:12px;background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:8px 12px;border-radius:2px;cursor:pointer;">Clear</button>
+      <select id="fYear"><option value="">All years</option></select>
+      <select id="fMonth"><option value="">All months</option></select>
+      <select id="fStatus"><option value="">All statuses</option><option>Open</option><option>Paid</option><option>Overdue</option><option>Not due</option><option>Due this month</option></select>
+      <select id="fCategory"><option value="">All categories</option></select>
+      <select id="fVendor"><option value="">All vendors</option></select>
+      <input id="fInvoiceDate" type="date" title="Invoice date">
+      <input id="fDueDate" type="date" title="Due date">
     </div>
-    <table id="invoiceTable">
-      <thead>
-        <tr>
-          <th>Vendor</th><th>Invoice #</th><th>Category</th><th>Invoice date</th><th>Due date</th>
-          <th class="num">Original</th><th class="num">Paid</th><th class="num">Balance</th><th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="invoiceTableBody"></tbody>
-    </table>
+    <div class="filter-actions"><button class="btn" id="clearFilters">Clear filters</button><input id="fSearch" type="text" placeholder="Search vendor or invoice #" style="height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;min-width:230px"></div>
+    <div class="card" style="padding:0"><div class="table-wrap" style="border:0"><table><thead><tr><th>Vendor</th><th>Invoice #</th><th>Invoice date</th><th>Due date</th><th>Category</th><th>Subcategory</th><th class="num">Original</th><th class="num">Paid</th><th class="num">Remaining</th><th class="num">Days overdue</th><th>Status</th></tr></thead><tbody id="invoiceTable"></tbody></table></div></div>
   </section>
 
-  <footer>
-    <span>Data source: Bill.com (synced via GitHub Actions) · vendor mapping: data/vendor-map.json</span>
-    <span id="generatedAt"></span>
-  </footer>
+  <section class="section">
+    <div class="section-head"><div><h2>Data quality & classification</h2><p>Items that may require accounting review before the dashboard is considered fully classified.</p></div></div>
+    <div class="card"><div class="quality" id="qualityGrid"></div></div>
+  </section>
 
+  <div class="footer"><span id="footerSource">Source: QuickBooks Online</span><span>Open AP uses remaining bill balance. Paid bills are retained only for drill-down. Unapplied vendor credits are shown separately.</span></div>
 </div>
-
 <script>
-const CATEGORY_COLORS = {
-  "Inventory": "#5B584E",
-  "Shipping & Fulfillment": "#8A6D3B",
-  "Advertising": "#A6432E",
-  "Sales & Marketing": "#6E5A9A",
-  "G&A / OPEX": "#3B6E4F",
-  "Unclassified": "#B9B5A7"
-};
-const AGING_KEYS = ["not_yet_due","due_this_month","overdue_lt_3m","overdue_gt_3m"];
-const AGING_LABELS = {not_yet_due:"Not due", due_this_month:"Due this month", overdue_lt_3m:"Overdue < 3m", overdue_gt_3m:"Overdue > 3m"};
+const $=id=>document.getElementById(id);let DATA=null, filtered=[];
+const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:DATA?.currency||'USD',maximumFractionDigits:0}).format(Number(v||0));
+const money2=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:DATA?.currency||'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
+const pct=(v,t)=>t?`${(100*v/t).toFixed(1)}% of total`:'0.0% of total';
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-let DATA = null;
-let categoryChartInstance = null;
-let trendChartInstance = null;
-let activeCategory = null;
-
-function fmt(n){
-  return "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-function fmtShort(n){
-  return "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:0});
+function setupFilters(){
+ const inv=DATA.invoices||[];
+ const years=[...new Set(inv.map(x=>(x.invoice_date||'').slice(0,4)).filter(Boolean))].sort().reverse();
+ years.forEach(y=>$('fYear').insertAdjacentHTML('beforeend',`<option>${esc(y)}</option>`));
+ const months=['01 Jan','02 Feb','03 Mar','04 Apr','05 May','06 Jun','07 Jul','08 Aug','09 Sep','10 Oct','11 Nov','12 Dec'];months.forEach(m=>$('fMonth').insertAdjacentHTML('beforeend',`<option value="${m.slice(0,2)}">${m.slice(3)}</option>`));
+ [...new Set(inv.map(x=>x.category).filter(Boolean))].sort().forEach(v=>$('fCategory').insertAdjacentHTML('beforeend',`<option>${esc(v)}</option>`));
+ [...new Set(inv.map(x=>x.vendor).filter(Boolean))].sort().forEach(v=>$('fVendor').insertAdjacentHTML('beforeend',`<option>${esc(v)}</option>`));
+ ['fYear','fMonth','fStatus','fCategory','fVendor','fInvoiceDate','fDueDate','fSearch'].forEach(id=>$(id).addEventListener(id==='fSearch'?'input':'change',applyFilters));
+ $('clearFilters').onclick=()=>{['fYear','fMonth','fStatus','fCategory','fVendor','fInvoiceDate','fDueDate','fSearch'].forEach(id=>$(id).value='');applyFilters()};
 }
 
-function cssVar(name){
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
+function renderKPIs(){const k=DATA.kpis||{},t=k.total_ap||0;$('kTotal').textContent=money2(t);$('kNotDue').textContent=money(k.not_yet_due);$('kMonth').textContent=money(k.due_this_month);$('kLt3').textContent=money(k.overdue_lt_3m);$('kGt3').textContent=money(k.overdue_gt_3m);$('pNotDue').textContent=pct(k.not_yet_due,t);$('pMonth').textContent=pct(k.due_this_month,t);$('pLt3').textContent=pct(k.overdue_lt_3m,t);$('pGt3').textContent=pct(k.overdue_gt_3m,t);
+ const q=DATA.data_quality||{};$('openCount').textContent=q.open_bill_count??(DATA.invoices||[]).filter(x=>x.remaining_balance>0).length;$('criticalCount').textContent=(DATA.invoices||[]).filter(x=>x.remaining_balance>0&&x.days_overdue>90).length;$('unclassifiedCount').textContent=q.unclassified_count??'—';$('creditsValue').textContent=money(q.available_vendor_credits||0);
+ const gen=DATA.generated_at?new Date(DATA.generated_at):null;$('asOf').textContent=gen?`Updated ${gen.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`:'Updated —';$('sourcePill').textContent=DATA.company?`${DATA.company} · QuickBooks`:'QuickBooks Online';$('footerSource').textContent=DATA.source_note||'Source: QuickBooks Online';}
 
-/* ---------- THEME ---------- */
-function setTheme(mode){
-  document.documentElement.setAttribute("data-theme", mode);
-  document.querySelectorAll(".theme-toggle button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.mode===mode);
-  });
-  localStorage.setItem("ap-theme", mode);
-  if (DATA) { renderCategoryChart(); renderTrendChart(); }
-}
-document.getElementById("themeToggle").addEventListener("click",(e)=>{
-  const btn = e.target.closest("button");
-  if(!btn) return;
-  setTheme(btn.dataset.mode);
-});
-setTheme(localStorage.getItem("ap-theme") || (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark":"light"));
+function renderAging(){const k=DATA.kpis||{},t=k.total_ap||1;const seg=[['not_yet_due','notdue-bg','Not yet due'],['due_this_month','month-bg','Due this month'],['overdue_lt_3m','lt3-bg','Overdue < 3m'],['overdue_gt_3m','gt3-bg','Overdue > 3m']];$('agingBar').innerHTML=seg.map(([key,cls])=>`<span class="${cls}" style="width:${100*(k[key]||0)/t}%"></span>`).join('');$('agingLegend').innerHTML=seg.map(([key,cls,label])=>`<span><i class="${cls}"></i>${label}: <b>${money(k[key]||0)}</b></span>`).join('');}
 
-/* ---------- LOAD DATA ---------- */
-async function loadData(){
-  const res = await fetch("data/ap-data.json", {cache:"no-store"});
-  DATA = await res.json();
-  render();
-}
+function bars(container,rows,labelKey,valueKey,onClick){const max=Math.max(1,...rows.map(x=>Number(x[valueKey]||0)));$(container).innerHTML=rows.length?rows.map((r,i)=>`<div class="hrow" ${onClick?`style="cursor:pointer" data-i="${i}"`:''}><div class="hlabel" title="${esc(r[labelKey])}">${esc(r[labelKey])}</div><div class="track"><div class="fill" style="width:${100*Number(r[valueKey]||0)/max}%"></div></div><div class="hvalue">${money(r[valueKey])}</div></div>`).join(''):'<div class="empty">No data</div>';if(onClick)[...$(container).querySelectorAll('[data-i]')].forEach(el=>el.onclick=()=>onClick(rows[+el.dataset.i]));}
+function renderCharts(){bars('categoryBars',(DATA.categories||[]).filter(x=>x.total>0),'name','total',r=>drillCategory(r.name));bars('vendorBars',(DATA.top_vendors||[]).slice(0,5),'vendor','balance');const tr=DATA.monthly_trend||[],max=Math.max(1,...tr.map(x=>x.total_ap||0));$('trend').innerHTML=tr.length?tr.map(x=>`<div class="tcol"><div class="tval">${money(x.total_ap)}</div><div class="tbar-wrap"><div class="tbar" style="height:${100*(x.total_ap||0)/max}%"></div></div><div class="tmonth">${esc(x.month)}</div></div>`).join(''):'<div class="empty">Trend will build as weekly snapshots accumulate.</div>';
+ const open=(DATA.invoices||[]).filter(x=>x.remaining_balance>0).sort((a,b)=>{const ao=a.days_overdue||0,bo=b.days_overdue||0;if(ao||bo)return bo-ao;return String(a.due_date||'9999').localeCompare(String(b.due_date||'9999'))}).slice(0,7);$('attentionList').innerHTML=open.length?open.map(x=>`<div class="up-item"><div class="date-badge">${x.days_overdue>0?`${x.days_overdue}d late`:(x.due_date?esc(x.due_date.slice(5)):'No due')}</div><div><div class="vendor">${esc(x.vendor)}</div><div class="sub">${esc(x.category)} · ${esc(x.invoice_number||'No invoice #')}</div></div><div class="amt">${money(x.remaining_balance)}</div></div>`).join(''):'<div class="empty">No open bills.</div>';}
 
-function render(){
-  document.getElementById("heroTotal").textContent = Number(DATA.kpis.total_ap).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById("asOf").textContent = "As of " + new Date(DATA.generated_at).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
-  document.getElementById("generatedAt").textContent = "Last sync: " + new Date(DATA.generated_at).toLocaleString("en-US");
+function renderCategoryTable(){let rows=(DATA.categories||[]);let total={name:'Total',total:0,not_yet_due:0,due_this_month:0,overdue_lt_3m:0,overdue_gt_3m:0};rows.forEach(r=>Object.keys(total).slice(1).forEach(k=>total[k]+=Number(r[k]||0)));$('categoryTable').innerHTML=rows.map(r=>`<tr><td><span class="cat-link" data-cat="${esc(r.name)}">${esc(r.name)}</span></td><td class="num">${money2(r.total)}</td><td class="num">${money2(r.not_yet_due)}</td><td class="num">${money2(r.due_this_month)}</td><td class="num">${money2(r.overdue_lt_3m)}</td><td class="num">${money2(r.overdue_gt_3m)}</td></tr>`).join('')+`<tr class="summary-total"><td>Total</td><td class="num">${money2(total.total)}</td><td class="num">${money2(total.not_yet_due)}</td><td class="num">${money2(total.due_this_month)}</td><td class="num">${money2(total.overdue_lt_3m)}</td><td class="num">${money2(total.overdue_gt_3m)}</td></tr>`;[...document.querySelectorAll('[data-cat]')].forEach(el=>el.onclick=()=>drillCategory(el.dataset.cat));}
+function drillCategory(cat){$('fCategory').value=cat;applyFilters();$('detailSection').scrollIntoView({behavior:'smooth',block:'start'});}
 
-  renderBeam();
-  renderKpis();
-  renderCategoryChart();
-  renderTrendChart();
-  renderCategoryTable();
-  populateCategoryFilter();
-  renderInvoiceTable();
-  renderUnclassifiedBanner();
-}
+function applyFilters(){const y=$('fYear').value,m=$('fMonth').value,s=$('fStatus').value,c=$('fCategory').value,v=$('fVendor').value,id=$('fInvoiceDate').value,dd=$('fDueDate').value,q=$('fSearch').value.trim().toLowerCase();filtered=(DATA.invoices||[]).filter(x=>{const inv=x.invoice_date||'';let statusOk=true;if(s==='Open')statusOk=x.remaining_balance>0;else if(s)statusOk=x.status===s;return(!y||inv.slice(0,4)===y)&&(!m||inv.slice(5,7)===m)&&statusOk&&(!c||x.category===c)&&(!v||x.vendor===v)&&(!id||x.invoice_date===id)&&(!dd||x.due_date===dd)&&(!q||`${x.vendor} ${x.invoice_number}`.toLowerCase().includes(q))});renderInvoiceTable();}
+function statusClass(s){return s==='Paid'?'s-paid':s==='Overdue'?'s-overdue':s==='Due this month'?'s-due':'s-not'}
+function renderInvoiceTable(){const tb=$('invoiceTable');$('resultCount').textContent=`${filtered.length} invoice${filtered.length===1?'':'s'}`;if(!filtered.length){tb.innerHTML='<tr><td colspan="11" class="empty">No invoices match these filters.</td></tr>';return}tb.innerHTML=filtered.map(x=>`<tr><td>${esc(x.vendor)}${x.duplicate_candidate?'<span class="flag">duplicate?</span>':''}</td><td>${esc(x.invoice_number||'—')}</td><td>${esc(x.invoice_date||'—')}</td><td>${x.due_date?esc(x.due_date):'<span class="flag">missing</span>'}</td><td>${esc(x.category)}</td><td>${esc(x.subcategory||'—')}</td><td class="num">${money2(x.original_amount)}</td><td class="num">${money2(x.amount_paid)}</td><td class="num"><b>${money2(x.remaining_balance)}</b></td><td class="num">${x.days_overdue||0}</td><td><span class="status ${statusClass(x.status)}">${esc(x.status)}</span></td></tr>`).join('');}
+function renderQuality(){const q=DATA.data_quality||{};const items=[['Unclassified',`${q.unclassified_count??0} bills`,money2(q.unclassified_balance||0)+' open balance'],['Missing due date',q.missing_due_date_count??0,'Review aging reliability'],['Duplicate candidates',q.duplicate_candidate_count??0,'Heuristic review only'],['Available vendor credits',money2(q.available_vendor_credits||0),'Shown separately until applied']];$('qualityGrid').innerHTML=items.map(([a,b,c])=>`<div class="q"><b>${esc(b)}</b><span>${esc(a)} · ${esc(c)}</span></div>`).join('');}
 
-function renderBeam(){
-  const track = document.getElementById("beamTrack");
-  const legend = document.getElementById("beamLegend");
-  track.innerHTML = ""; legend.innerHTML = "";
-  const total = DATA.kpis.total_ap || 1;
-  const colors = {not_yet_due:"var(--accent-not-due)", due_this_month:"var(--accent-due)", overdue_lt_3m:"var(--accent-lt3)", overdue_gt_3m:"var(--accent-gt3)"};
-  AGING_KEYS.forEach(k=>{
-    const pct = (DATA.kpis[k]/total*100).toFixed(1);
-    const seg = document.createElement("div");
-    seg.className = "beam-seg";
-    seg.style.width = pct+"%";
-    seg.style.background = colors[k];
-    seg.title = AGING_LABELS[k]+": "+fmt(DATA.kpis[k]);
-    track.appendChild(seg);
-
-    const l = document.createElement("span");
-    l.innerHTML = `<span class="dot" style="background:${colors[k]}"></span>${AGING_LABELS[k]} · ${pct}%`;
-    legend.appendChild(l);
-  });
-}
-
-function renderKpis(){
-  const row = document.getElementById("kpiRow");
-  row.innerHTML = "";
-  const items = [
-    {k:"total", label:"Total AP", value:DATA.kpis.total_ap},
-    {k:"not_yet_due", label:"Not yet due", value:DATA.kpis.not_yet_due},
-    {k:"due_this_month", label:"Due this month", value:DATA.kpis.due_this_month},
-    {k:"overdue_lt_3m", label:"Overdue < 3 months", value:DATA.kpis.overdue_lt_3m},
-    {k:"overdue_gt_3m", label:"Overdue > 3 months", value:DATA.kpis.overdue_gt_3m},
-  ];
-  items.forEach(it=>{
-    const pct = it.k==="total" ? "" : ((it.value/DATA.kpis.total_ap)*100).toFixed(1)+"% of total";
-    const div = document.createElement("div");
-    div.className = "kpi"; div.dataset.k = it.k;
-    div.innerHTML = `<div class="kpi-label">${it.label}</div><div class="kpi-value">${fmt(it.value)}</div><div class="kpi-pct">${pct}</div>`;
-    row.appendChild(div);
-  });
-}
-
-function renderCategoryChart(){
-  const ctx = document.getElementById("categoryChart");
-  const ink = cssVar('--ink'), inkSoft = cssVar('--ink-soft'), line = cssVar('--line');
-  const labels = DATA.categories.map(c=>c.name);
-  const datasets = AGING_KEYS.map((k,i)=>({
-    label: AGING_LABELS[k],
-    data: DATA.categories.map(c=>c[k]),
-    backgroundColor: [cssVar('--accent-not-due'),cssVar('--accent-due'),cssVar('--accent-lt3'),cssVar('--accent-gt3')][i],
-    stack: "s"
-  }));
-  if(categoryChartInstance) categoryChartInstance.destroy();
-  categoryChartInstance = new Chart(ctx, {
-    type:"bar",
-    data:{labels, datasets},
-    options:{
-      responsive:true,
-      plugins:{ legend:{position:"bottom", labels:{color:inkSoft, font:{family:"IBM Plex Mono", size:10.5}}},
-        tooltip:{callbacks:{label:(c)=>` ${c.dataset.label}: ${fmt(c.raw)}`}} },
-      scales:{
-        x:{stacked:true, ticks:{color:inkSoft, font:{family:"Inter", size:11}}, grid:{color:line}},
-        y:{stacked:true, ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}, callback:v=>fmtShort(v)}, grid:{color:line}}
-      }
-    }
-  });
-}
-
-function renderTrendChart(){
-  const ctx = document.getElementById("trendChart");
-  const ink = cssVar('--ink'), inkSoft = cssVar('--ink-soft'), line = cssVar('--line');
-  if(trendChartInstance) trendChartInstance.destroy();
-  trendChartInstance = new Chart(ctx, {
-    type:"line",
-    data:{
-      labels: DATA.monthly_trend.map(m=>m.month),
-      datasets:[{
-        label:"Total AP",
-        data: DATA.monthly_trend.map(m=>m.total_ap),
-        borderColor: ink, backgroundColor:"transparent", tension:.25, pointRadius:3
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>` ${fmt(c.raw)}`}}},
-      scales:{
-        x:{ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}}, grid:{color:line}},
-        y:{ticks:{color:inkSoft, font:{family:"IBM Plex Mono", size:10}, callback:v=>fmtShort(v)}, grid:{color:line}}
-      }
-    }
-  });
-}
-
-function renderCategoryTable(){
-  const body = document.getElementById("categoryTableBody");
-  const foot = document.getElementById("categoryTableFoot");
-  body.innerHTML = "";
-  DATA.categories.forEach(cat=>{
-    const tr = document.createElement("tr");
-    tr.dataset.category = cat.name;
-    if(activeCategory === cat.name) tr.classList.add("selected");
-    const total = cat.total || 1;
-    const barSegs = AGING_KEYS.map((k,i)=>{
-      const w = (cat[k]/total*100).toFixed(1);
-      const color = [cssVar('--accent-not-due'),cssVar('--accent-due'),cssVar('--accent-lt3'),cssVar('--accent-gt3')][i];
-      return `<span style="width:${w}%;background:${color}"></span>`;
-    }).join("");
-    tr.innerHTML = `
-      <td><span class="cat-name"><span class="cat-bar">${barSegs}</span>${cat.name}</span></td>
-      <td class="num">${fmt(cat.total)}</td>
-      <td class="num">${fmt(cat.not_yet_due)}</td>
-      <td class="num">${fmt(cat.due_this_month)}</td>
-      <td class="num">${fmt(cat.overdue_lt_3m)}</td>
-      <td class="num">${fmt(cat.overdue_gt_3m)}</td>
-    `;
-    tr.addEventListener("click", ()=>{
-      activeCategory = (activeCategory === cat.name) ? null : cat.name;
-      document.getElementById("filterCategory").value = activeCategory || "";
-      renderCategoryTable();
-      renderInvoiceTable();
-    });
-    body.appendChild(tr);
-  });
-
-  const totals = DATA.kpis;
-  foot.innerHTML = `<tr style="font-weight:600;">
-      <td>Total</td>
-      <td class="num">${fmt(totals.total_ap)}</td>
-      <td class="num">${fmt(totals.not_yet_due)}</td>
-      <td class="num">${fmt(totals.due_this_month)}</td>
-      <td class="num">${fmt(totals.overdue_lt_3m)}</td>
-      <td class="num">${fmt(totals.overdue_gt_3m)}</td>
-    </tr>`;
-}
-
-function populateCategoryFilter(){
-  const sel = document.getElementById("filterCategory");
-  sel.innerHTML = '<option value="">All categories</option>' +
-    DATA.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join("");
-  sel.addEventListener("change", ()=>{
-    activeCategory = sel.value || null;
-    renderCategoryTable();
-    renderInvoiceTable();
-  });
-  document.getElementById("filterStatus").addEventListener("change", renderInvoiceTable);
-  document.getElementById("filterVendor").addEventListener("input", renderInvoiceTable);
-  document.getElementById("clearFilters").addEventListener("click", ()=>{
-    activeCategory = null;
-    sel.value = "";
-    document.getElementById("filterStatus").value = "";
-    document.getElementById("filterVendor").value = "";
-    renderCategoryTable();
-    renderInvoiceTable();
-  });
-}
-
-function statusChipClass(status){
-  if(status==="Overdue") return "overdue";
-  if(status==="Due this month") return "due";
-  if(status==="Paid") return "paid";
-  return "notdue";
-}
-
-function renderInvoiceTable(){
-  const body = document.getElementById("invoiceTableBody");
-  const statusFilter = document.getElementById("filterStatus").value;
-  const vendorFilter = document.getElementById("filterVendor").value.toLowerCase();
-  const catFilter = activeCategory;
-
-  const rows = DATA.invoices.filter(inv=>{
-    if(catFilter && inv.category !== catFilter) return false;
-    if(statusFilter && inv.status !== statusFilter) return false;
-    if(vendorFilter && !(inv.vendor.toLowerCase().includes(vendorFilter) || inv.invoice_number.toLowerCase().includes(vendorFilter))) return false;
-    return true;
-  });
-
-  document.getElementById("invoiceSectionTitle").textContent = catFilter ? `Invoice detail — ${catFilter}` : "Invoice detail";
-  document.getElementById("invoiceCount").textContent = `${rows.length} invoice${rows.length===1?"":"s"}`;
-
-  body.innerHTML = rows.map(inv=>`
-    <tr>
-      <td>${inv.vendor}</td>
-      <td>${inv.invoice_number}</td>
-      <td>${inv.category}</td>
-      <td>${inv.invoice_date}</td>
-      <td>${inv.due_date}</td>
-      <td class="num">${fmt(inv.original_amount)}</td>
-      <td class="num">${fmt(inv.amount_paid)}</td>
-      <td class="num">${fmt(inv.remaining_balance)}</td>
-      <td><span class="status-chip ${statusChipClass(inv.status)}">${inv.status}</span></td>
-    </tr>
-  `).join("") || `<tr><td colspan="9" style="color:var(--ink-soft);font-style:italic;">No invoices match these filters.</td></tr>`;
-}
-
-function renderUnclassifiedBanner(){
-  const banner = document.getElementById("unclassifiedBanner");
-  const unclassified = DATA.categories.find(c=>c.name==="Unclassified");
-  if(unclassified && unclassified.total > 0){
-    banner.style.display = "block";
-    banner.textContent = `⚠ ${fmt(unclassified.total)} sits in Unclassified — add these vendors to data/vendor-map.json so they roll into the right category.`;
-  }
-}
-
-loadData();
+fetch(`data/ap-data.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}).then(data=>{DATA=data;renderKPIs();renderAging();renderCharts();renderCategoryTable();renderQuality();setupFilters();applyFilters();}).catch(err=>{console.error(err);document.querySelector('.shell').insertAdjacentHTML('afterbegin',`<div class="card" style="border-left:4px solid var(--red);margin-bottom:15px"><b>Dashboard data could not be loaded.</b><div class="subtitle">${esc(err.message)}. Confirm data/ap-data.json exists in the deployed branch.</div></div>`)});
 </script>
-</body>
-</html>
+</body></html>
