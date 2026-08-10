@@ -1,99 +1,60 @@
-# Accounts Payable Dashboard — Corro / Cavali
+# Accounts Payable Dashboard — QuickBooks Online
 
-Dashboard ejecutivo de cuentas por pagar para la CEO. Fuente principal: **Bill.com**
-(con QuickBooks como referencia de categoría contable si hace falta más adelante).
+The dashboard UI is unchanged. The data source is now **QuickBooks Online**.
+If BILL is already synchronized with QuickBooks, this repository does **not** connect to the BILL API.
 
-Vista pública en inglés, modo claro/oscuro (☀️/🌙), pensado para leerse en 10 segundos:
-cuánto se debe, qué tan urgente es, y en qué se concentra.
+## Data flow
 
-## Estructura del proyecto
+`BILL -> QuickBooks Online -> QBO Accounting API -> GitHub Actions -> data/ap-data.json -> GitHub Pages`
 
-```
-ap-dashboard/
-├── index.html                  <- el dashboard (esto es lo que se ve en GitHub Pages)
-├── data/
-│   ├── ap-data.json            <- datos que consume el dashboard (por ahora, datos de muestra)
-│   └── vendor-map.json         <- reglas para clasificar vendors en categorías
-├── scripts/
-│   ├── bill_client.py          <- cliente de la API de Bill.com (scaffold, falta validar campos reales)
-│   ├── transform.py            <- convierte facturas de Bill en ap-data.json
-│   └── requirements.txt
-└── .github/workflows/
-    └── update-ap-data.yml      <- corre diario, jala Bill.com, actualiza datos y publica en Pages
-```
+## Repository secrets
 
-## Cómo subirlo a GitHub (una sola vez)
+Create these under **Settings -> Secrets and variables -> Actions -> Repository secrets**:
 
-1. Crea un repo nuevo, público o privado, ej. `ap-dashboard`.
-2. Sube todo el contenido de esta carpeta a la rama `main`.
-3. En el repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-   (No uses "Deploy from a branch"; el workflow ya incluido se encarga de publicar.)
-4. En **Settings → Secrets and variables → Actions → New repository secret**, agrega:
+- `QBO_CLIENT_ID`
+- `QBO_CLIENT_SECRET`
+- `QBO_REALM_ID`
+- `QBO_REFRESH_TOKEN`
 
-   | Nombre | Valor |
-   |---|---|
-   | `BILL_API_KEY` | Dev/App key de la cuenta de Bill.com |
-   | `BILL_USERNAME` | Usuario de Bill.com |
-   | `BILL_PASSWORD` | Password del usuario de Bill.com |
-   | `BILL_ORG_ID` | orgId de la organización en Bill.com |
+Under **Variables**, create:
 
-   Esto es exactamente lo que pediste: las credenciales viven solo en
-   **Settings → Secrets and variables → Actions**, nunca en el código ni en el repo.
+- `QBO_ENVIRONMENT` = `sandbox` while using Development credentials.
+- Change it to `production` only when Intuit has issued Production credentials and the real QBO company has authorized the app.
 
-5. Corre el workflow manualmente la primera vez: pestaña **Actions → Update AP Dashboard Data → Run workflow**.
-   Si todo sale bien, en unos minutos el dashboard queda publicado en
-   `https://<tu-usuario>.github.io/ap-dashboard/`.
+> Development credentials only connect to Intuit sandbox companies. They cannot read the real company file.
 
-## Qué falta confirmar antes de conectar datos reales
+## Source and classification logic
 
-`bill_client.py` y `transform.py` están armados como punto de partida funcional,
-pero **necesito validar contra la cuenta real de Bill.com** antes de que jalen datos de verdad:
+The pipeline reads open QuickBooks `Bill` transactions (`Balance > 0`) and resolves:
 
-- Si la cuenta usa la API v3 (BDC, la que asumí) o todavía v2 "Classic" — cambia el cliente.
-- Nombres exactos de campos que devuelve `bill/list` (`vendorName`, `amountDue`, `dueDate`, etc. — los puse con los nombres más comunes de la documentación pública, pero hay que confirmarlos).
-- Si la categoría contable (Inventory / Advertising / G&A, etc.) conviene traerla desde
-  Bill.com directamente o cruzarla con QuickBooks (tú mencionaste que QB ya está conectado con Bill).
-- Cómo tratar facturas parcialmente pagadas, vendor credits, y facturas sin `dueDate`.
-- Frecuencia real de actualización deseada (el workflow está en diario, se ajusta en un minuto).
+- Vendor (`VendorRef`)
+- Bill/invoice number (`DocNumber`)
+- Transaction date (`TxnDate`)
+- Due date (`DueDate`)
+- Original amount (`TotalAmt`)
+- Outstanding balance (`Balance`)
+- Accounting detail from `AccountBasedExpenseLineDetail` or the expense account associated with item lines
 
-En cuanto me pases acceso de prueba (o un export de muestra) a Bill.com, conecto
-`transform.py` con datos reales y quito los datos de muestra de `ap-data.json`.
+Accounting account names are used first to classify AP into:
 
-## Cómo clasifica vendors hoy
+- Inventory
+- Shipping & Fulfillment
+- Advertising
+- Sales & Marketing
+- G&A / OPEX
+- Unclassified
 
-`data/vendor-map.json` tiene reglas por palabra clave (ej. "google" → Advertising,
-"shipstation" → Shipping & Fulfillment). Cualquier vendor que no matchee cae en
-**Unclassified**, y el dashboard muestra un aviso visible cuando hay monto ahí,
-para que sea fácil detectar vendors nuevos y agregarlos al mapeo.
+`data/vendor-map.json` remains only as a fallback when a bill does not expose enough accounting detail.
 
-## Categorías y rangos de aging (según lo que pidió Ceci)
+## First test
 
-- **Categorías:** Inventory, Shipping & Fulfillment, Advertising, Sales & Marketing, G&A / OPEX, Unclassified.
-- **Aging:** Not yet due · Due this month · Overdue < 3 months · Overdue > 3 months.
-  (Se dejó esta estructura ejecutiva de 4 rangos en vez del aging estándar de 30/60/90/90+,
-  tal como sugirió Ceci para no sobrecargar la vista.)
+1. Add the four QBO secrets.
+2. Set repository variable `QBO_ENVIRONMENT=sandbox`.
+3. Authorize a QuickBooks sandbox company and obtain its `realmId` + refresh token.
+4. Run **Actions -> Update AP Dashboard Data -> Run workflow**.
 
-## Campos que agregué sobre la solicitud original
+For the real Corro/Cavali company, repeat the OAuth authorization with **Production** credentials and set `QBO_ENVIRONMENT=production`.
 
-Para que el reporte realmente sirva como herramienta de decisión y no solo como
-un volcado de Bill, agregué:
+## OAuth token note
 
-- **Hero number + "ledger beam"**: el total y su composición por urgencia, de un vistazo,
-  antes de bajar a cualquier tabla.
-- **Tendencia mensual de AP** (6 meses): para ver si la deuda total sube o baja mes a mes,
-  no solo la foto de hoy.
-- **Filtros combinables** (categoría + status + búsqueda de vendor/factura) en vez de solo
-  clic en categoría, para que la CEO pueda buscar un vendor puntual sin salir del dashboard.
-- **Aviso automático de "Unclassified"**: si hay plata sin categorizar, se ve de inmediato
-  en vez de quedar escondida en la tabla.
-- **Barra de aging mini por categoría** dentro de la tabla resumen, para no tener que
-  abrir el drill-down solo para ver si una categoría está mayormente vencida o no.
-
-## Próximos pasos sugeridos
-
-1. Confirmar credenciales y estructura real de la API de Bill.com.
-2. Validar con Ceci los nombres finales de categoría y si abrir G&A / OPEX en
-   Payroll / Consulting / Software / Rent más adelante.
-3. Decidir si el histórico mensual se calcula acumulando corridas del workflow
-   (cada corrida guarda un snapshot) o si se trae directo de Bill/QuickBooks.
-4. Evaluar permisos del repo (privado, con acceso solo para el equipo de finanzas y la CEO).
+QuickBooks can return a new refresh token during refresh. For a durable unattended production integration, the latest refresh token should be persisted securely. The current workflow is ready for initial testing with a GitHub Secret; production token persistence should be finalized when Production access is available.
