@@ -1,0 +1,121 @@
+name: Update AP Dashboard Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:15 La Paz (UTC-4). Coefficient should refresh before this time.
+    - cron: "15 13 * * *"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: payables-pages
+  cancel-in-progress: false
+
+# These are public/non-secret sheet identifiers. Keeping them here means the
+# workflow runs even when repository Variables were created in the wrong tab.
+# If the source sheet changes, edit only these five values.
+env:
+  GSHEET_ID: "1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c"
+  GSHEET_VENDOR_BALANCE_SHEET: "QuickBooks Vendor Balance Detail Import"
+  GSHEET_VENDOR_BALANCE_GID: "1046490113"
+  GSHEET_GENERAL_LEDGER_SHEET: "QuickBooks General Ledger Import"
+  GSHEET_GENERAL_LEDGER_GID: "186431676"
+
+jobs:
+  update-data:
+    name: Update AP from Coefficient / Google Sheets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      - name: Show configured source
+        shell: bash
+        run: |
+          echo "Spreadsheet: $GSHEET_ID"
+          echo "Vendor Balance GID: $GSHEET_VENDOR_BALANCE_GID"
+          echo "General Ledger GID: $GSHEET_GENERAL_LEDGER_GID"
+
+      - name: Build AP dashboard data
+        run: python scripts/transform.py
+
+      - name: Validate generated JSON
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("data/ap-data.json")
+          if not p.exists():
+              raise SystemExit("data/ap-data.json was not generated")
+
+          data = json.loads(p.read_text(encoding="utf-8"))
+          total = float(data.get("kpis", {}).get("total_ap", 0) or 0)
+          vendor_total = float(data.get("reconciliation", {}).get("vendor_balance_total", 0) or 0)
+          variance = float(data.get("reconciliation", {}).get("variance", 0) or 0)
+
+          print(f"Company: {data.get('company')}")
+          print(f"Total AP: ${total:,.2f}")
+          print(f"Vendor Balance control: ${vendor_total:,.2f}")
+          print(f"Variance: ${variance:,.2f}")
+
+          if abs(variance) > 0.02:
+              print("::warning title=AP reconciliation variance::Dashboard rows do not exactly reconcile to the Vendor Balance Detail control total.")
+          PY
+
+      - name: Commit updated dashboard data
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ap-data.json
+          if git diff --staged --quiet; then
+            echo "No AP data changes to commit."
+          else
+            git commit -m "chore: update AP data from Coefficient [automatic]"
+            git pull --rebase origin "${{ github.event.repository.default_branch }}"
+            git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          fi
+
+      - name: Upload dashboard artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    needs: update-data
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

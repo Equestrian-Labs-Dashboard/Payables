@@ -1,46 +1,16 @@
-# Accounts Payable Dashboard — QuickBooks via Coefficient
+# Payables Dashboard — Coefficient / QuickBooks (FIX12)
 
-## Data flow
+Source flow: **QuickBooks Online (real company) → Coefficient → Google Sheets → GitHub Actions → GitHub Pages**.
 
-QuickBooks Online (real Equestrian Labs company) → Coefficient → Google Sheets → GitHub Actions → `data/ap-data.json` → GitHub Pages.
+FIX12 handles the actual Coefficient `Vendor Balance Detail` layout where `Amount` and `Open Balance` headers can exist but their transaction cells are blank. The parser reconstructs each transaction's open amount from the change in QuickBooks' populated running `Balance` column, resetting the baseline for each vendor.
 
-This version does **not** require Intuit Developer / QBO OAuth secrets in GitHub.
+Configured source IDs:
+- Spreadsheet: `1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c`
+- Vendor Balance Detail GID: `1046490113`
+- General Ledger GID: `186431676`
 
-## Required Coefficient imports in the same Google spreadsheet
+Replace:
+- `scripts/transform.py`
+- `.github/workflows/update-ap-data.yml` (use the included `update-ap-data.yml` at repository path `.github/workflows/update-ap-data.yml`)
 
-### 1. `AP_VENDOR_BALANCE` (required)
-Create/import: QuickBooks → **Vendor Balance Detail** → **All Dates** → **Accrual**.
-This report is the authoritative source for vendor, bill number, bill date, due date, original amount and open balance.
-
-### 2. `General Ledger` (recommended)
-Reuse the existing General Ledger Coefficient import. The dashboard uses Bill rows to infer the QuickBooks distribution account for each open transaction. It excludes A/P and bank control accounts.
-
-If the General Ledger import is unavailable, the dashboard still runs and falls back to `data/vendor-map.json` for executive categories.
-
-## Google Sheet sharing
-Set the spreadsheet to **Anyone with the link → Viewer** (not Editor). This lets GitHub Actions read the CSV without storing Google credentials.
-
-## GitHub Variables
-Repository → Settings → Secrets and variables → Actions → **Variables**
-
-- `GSHEET_ID` = `1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c`
-- `GSHEET_VENDOR_BALANCE_SHEET` = `AP_VENDOR_BALANCE`
-- `GSHEET_GENERAL_LEDGER_SHEET` = `General Ledger`
-- `GSHEET_GENERAL_LEDGER_GID` = `186431676` (optional; use if this is the current General Ledger tab)
-- `GSHEET_VENDOR_BALANCE_GID` = leave unset unless you prefer using the tab gid.
-
-No QBO secrets are required by this workflow.
-
-## Refresh
-1. Coefficient refreshes QuickBooks data in Google Sheets (manual or scheduled in Coefficient).
-2. GitHub Actions runs daily at 09:00 La Paz and can also be run manually.
-3. `data/ap-data.json` is rebuilt and GitHub Pages redeploys.
-
-## AP logic
-- `Vendor Balance Detail` TOTAL = independent control total.
-- `Net AP` = sum of all non-zero open balances in Vendor Balance Detail.
-- `Gross open bills` = positive open balances where transaction type = Bill.
-- Vendor credits and other adjustments are shown separately.
-- Aging is calculated from positive open Bills only.
-- Account allocation tries, in order: exact Vendor + Invoice + Type, exact Vendor + Invoice, Vendor history, then vendor-map fallback.
-- `Accounts Payable (A/P)` and bank control accounts are excluded from distribution-account classification to avoid double counting.
+No QuickBooks OAuth secrets are required for this Coefficient-based workflow.

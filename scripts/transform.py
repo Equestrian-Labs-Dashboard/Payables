@@ -246,6 +246,7 @@ def parse_vendor_balance(csv_text):
             break
 
     current_vendor = ""
+    previous_running_balance = 0.0
     transactions = []
     report_total = None
     transaction_like_rows = 0
@@ -263,38 +264,68 @@ def parse_vendor_balance(csv_text):
         row_label = populated[0] if populated else ""
         if row_label.upper() == "TOTAL":
             report_total, source = get_money_cell(row, h, "open_balance", "amount")
+            if not source:
+                report_total, source = get_money_cell(row, h, "balance")
             value_sources[f"report_total:{source or 'none'}"] += 1
             continue
 
-        # Vendor section row such as "Animal Health International".
-        if first and not dt_raw and not tx_type and not first.lower().startswith("total for "):
+        # Vendor section row such as "Animal Health International". In the exported
+        # report the vendor heading occupies the SAME first column whose header is
+        # "Date", so checking only for an empty raw Date is wrong. Treat a row as a
+        # vendor heading when it has no transaction type and the first cell is not a
+        # parseable date. QuickBooks' running Balance restarts for each vendor.
+        parsed_dt = parse_date(dt_raw)
+        if first and not tx_type and not parsed_dt and not first.lower().startswith("total for "):
             current_vendor = first
+            previous_running_balance = 0.0
             continue
 
-        if not dt_raw or not tx_type:
+        if not parsed_dt or not tx_type:
             continue
 
         transaction_like_rows += 1
         vendor = text(get_cell(row, h, "name")) or current_vendor
 
-        # Coefficient currently exposes duplicate QuickBooks labels (Open balance /
-        # Open Balance). Some accounts populate only one of them. Prefer any populated
-        # Open Balance field, then Amount. Balance is a running vendor balance and is
-        # intentionally NOT used as a transaction open balance.
+        # Coefficient's Vendor Balance Detail import can expose Amount/Open Balance
+        # headers while leaving those cells blank. The QuickBooks running Balance
+        # column is still populated. In that layout the transaction's open amount is
+        # exactly the change in the running vendor balance. Example: 543.90 ->
+        # 1,621.63 means the second bill contributes 1,077.73. This also preserves
+        # Vendor Credits because a credit reduces the running balance.
         open_balance, source = get_money_cell(row, h, "open_balance", "amount")
+
+        running_raw = get_cell(row, h, "balance")
+        running_present = text(running_raw) not in {"", "-", "—"}
+        running_balance = money(running_raw) if running_present else None
+
+        if not source and running_present:
+            open_balance = round(running_balance - previous_running_balance, 2)
+            source = "balance_delta"
+
+        # Keep the baseline aligned even when Amount/Open Balance happens to be
+        # populated on some rows and blank on others.
+        if running_present:
+            previous_running_balance = running_balance
+
         value_sources[source or "none"] += 1
         if abs(open_balance) < 0.005:
             continue
         nonzero_rows += 1
 
-        original_amount, _ = get_money_cell(row, h, "amount")
+        original_amount, original_source = get_money_cell(row, h, "amount")
+        if not original_source:
+            # For a current Vendor Balance Detail report, delta is the best available
+            # amount when Coefficient suppresses Amount. This is the remaining amount,
+            # not necessarily the historical original invoice amount for partial pays.
+            original_amount = open_balance
+
         transactions.append({
             "vendor": vendor or "Unknown vendor",
             "transaction_type": tx_type,
             "invoice_number": text(get_cell(row, h, "num")),
-            "invoice_date": parse_date(dt_raw),
+            "invoice_date": parsed_dt,
             "due_date": parse_date(get_cell(row, h, "due_date")),
-            "original_amount": original_amount,
+            "original_amount": round(original_amount, 2),
             "open_balance": round(open_balance, 2),
         })
 
@@ -305,8 +336,8 @@ def parse_vendor_balance(csv_text):
     # contains transactions but Coefficient returned blank money fields.
     if transaction_like_rows > 0 and nonzero_rows == 0:
         raise ValueError(
-            "Vendor Balance Detail contains transaction rows but Amount/Open Balance are blank or zero. "
-            "In Coefficient edit the import and include the populated Amount and Open Balance fields, then Refresh. "
+            "Vendor Balance Detail contains transaction rows but Amount/Open Balance and the running Balance are blank or zero. "
+            "Refresh the Coefficient Vendor Balance Detail import and verify that its Balance column is populated. "
             "The workflow is stopping instead of publishing an incorrect $0 dashboard."
         )
 
