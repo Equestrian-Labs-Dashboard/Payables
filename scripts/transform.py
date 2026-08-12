@@ -26,6 +26,12 @@ DATA_DIR = os.path.abspath(os.path.join(HERE, "..", "data"))
 OUTPUT_PATH = os.path.join(DATA_DIR, "ap-data.json")
 VENDOR_MAP_PATH = os.path.join(DATA_DIR, "vendor-map.json")
 
+DEFAULT_GSHEET_ID = "1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c"
+DEFAULT_VENDOR_BALANCE_GID = "1046490113"
+DEFAULT_GENERAL_LEDGER_GID = "186431676"
+DEFAULT_VENDOR_BALANCE_SHEET = "QuickBooks Vendor Balance Detail Import"
+DEFAULT_GENERAL_LEDGER_SHEET = "QuickBooks General Ledger Import"
+
 CATEGORIES = [
     "Inventory",
     "Shipping & Fulfillment",
@@ -561,11 +567,14 @@ def build_dashboard(vendor_csv, gl_csv=""):
 
 
 def main():
-    sheet_id = os.getenv("GSHEET_ID", "").strip()
-    vendor_sheet = os.getenv("GSHEET_VENDOR_BALANCE_SHEET", "AP_VENDOR_BALANCE").strip()
-    vendor_gid = os.getenv("GSHEET_VENDOR_BALANCE_GID", "").strip()
-    gl_sheet = os.getenv("GSHEET_GENERAL_LEDGER_SHEET", "General Ledger").strip()
-    gl_gid = os.getenv("GSHEET_GENERAL_LEDGER_GID", "").strip()
+    # The spreadsheet ID and GIDs are non-secret identifiers. Defaults point to the
+    # real Coefficient imports currently used by this project. GitHub variables may
+    # override them later without changing code.
+    sheet_id = (os.getenv("GSHEET_ID") or DEFAULT_GSHEET_ID).strip()
+    vendor_sheet = (os.getenv("GSHEET_VENDOR_BALANCE_SHEET") or DEFAULT_VENDOR_BALANCE_SHEET).strip()
+    vendor_gid = (os.getenv("GSHEET_VENDOR_BALANCE_GID") or DEFAULT_VENDOR_BALANCE_GID).strip()
+    gl_sheet = (os.getenv("GSHEET_GENERAL_LEDGER_SHEET") or DEFAULT_GENERAL_LEDGER_SHEET).strip()
+    gl_gid = (os.getenv("GSHEET_GENERAL_LEDGER_GID") or DEFAULT_GENERAL_LEDGER_GID).strip()
 
     client = GoogleSheetsClient(sheet_id)
     print(f"Reading Vendor Balance from Google Sheet: {vendor_sheet or vendor_gid}")
