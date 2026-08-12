@@ -1,84 +1,46 @@
-# Accounts Payable Dashboard — QuickBooks Online
-
-The dashboard design remains unchanged. The data source is **QuickBooks Online**.
-If BILL is already synchronized with QuickBooks, this repository does **not** need the BILL API.
+# Accounts Payable Dashboard — QuickBooks via Coefficient
 
 ## Data flow
 
-`BILL -> QuickBooks Online -> QBO Accounting API -> GitHub Actions -> data/ap-data.json -> GitHub Pages`
+QuickBooks Online (real Equestrian Labs company) → Coefficient → Google Sheets → GitHub Actions → `data/ap-data.json` → GitHub Pages.
 
-## GitHub secrets
+This version does **not** require Intuit Developer / QBO OAuth secrets in GitHub.
 
-Go to:
+## Required Coefficient imports in the same Google spreadsheet
 
-`Repository -> Settings -> Secrets and variables -> Actions -> Secrets -> New repository secret`
+### 1. `AP_VENDOR_BALANCE` (required)
+Create/import: QuickBooks → **Vendor Balance Detail** → **All Dates** → **Accrual**.
+This report is the authoritative source for vendor, bill number, bill date, due date, original amount and open balance.
 
-Create exactly these four repository secrets:
+### 2. `General Ledger` (recommended)
+Reuse the existing General Ledger Coefficient import. The dashboard uses Bill rows to infer the QuickBooks distribution account for each open transaction. It excludes A/P and bank control accounts.
 
-- `QBO_CLIENT_ID`
-- `QBO_CLIENT_SECRET`
-- `QBO_REALM_ID`
-- `QBO_REFRESH_TOKEN`
+If the General Ledger import is unavailable, the dashboard still runs and falls back to `data/vendor-map.json` for executive categories.
 
-Do **not** put quotes around their values.
+## Google Sheet sharing
+Set the spreadsheet to **Anyone with the link → Viewer** (not Editor). This lets GitHub Actions read the CSV without storing Google credentials.
 
-## GitHub variable
+## GitHub Variables
+Repository → Settings → Secrets and variables → Actions → **Variables**
 
-Go to:
+- `GSHEET_ID` = `1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c`
+- `GSHEET_VENDOR_BALANCE_SHEET` = `AP_VENDOR_BALANCE`
+- `GSHEET_GENERAL_LEDGER_SHEET` = `General Ledger`
+- `GSHEET_GENERAL_LEDGER_GID` = `186431676` (optional; use if this is the current General Ledger tab)
+- `GSHEET_VENDOR_BALANCE_GID` = leave unset unless you prefer using the tab gid.
 
-`Repository -> Settings -> Secrets and variables -> Actions -> Variables -> New repository variable`
+No QBO secrets are required by this workflow.
 
-Create:
+## Refresh
+1. Coefficient refreshes QuickBooks data in Google Sheets (manual or scheduled in Coefficient).
+2. GitHub Actions runs daily at 09:00 La Paz and can also be run manually.
+3. `data/ap-data.json` is rebuilt and GitHub Pages redeploys.
 
-- Name: `QBO_ENVIRONMENT`
-- Value: `sandbox`
-
-Use `sandbox` while the Intuit app uses Development credentials.
-Change it to `production` only after Production credentials are available and the real QuickBooks company has authorized the app.
-
-## GitHub Pages setting
-
-Go to:
-
-`Repository -> Settings -> Pages`
-
-Set:
-
-- **Source:** `GitHub Actions`
-
-The workflow declares the required `github-pages` deployment environment automatically.
-
-## Files used by the integration
-
-- `.github/workflows/update-ap-data.yml` — scheduled/manual data refresh + Pages deployment.
-- `scripts/quickbooks_client.py` — OAuth refresh and QuickBooks API queries.
-- `scripts/transform.py` — converts open QBO Bills into dashboard JSON.
-- `scripts/requirements.txt` — Python dependency list.
-- `data/vendor-map.json` — fallback classification only when QBO accounting detail is insufficient.
-- `data/ap-data.json` — generated dashboard data.
-
-## QuickBooks data used
-
-The pipeline reads open QuickBooks `Bill` transactions (`Balance > 0`) and resolves:
-
-- Vendor (`VendorRef`)
-- Bill/invoice number (`DocNumber`)
-- Transaction date (`TxnDate`)
-- Due date (`DueDate`)
-- Original amount (`TotalAmt`)
-- Outstanding balance (`Balance`)
-- Expense/item accounting detail from each bill line
-
-Account names are used first to classify AP. Vendor mapping is only a fallback.
-
-## Run a test
-
-1. Add all four QBO secrets.
-2. Add `QBO_ENVIRONMENT=sandbox` under **Variables**.
-3. Ensure the `QBO_REALM_ID` and `QBO_REFRESH_TOKEN` belong to the same sandbox company authorized with the Development app.
-4. Go to **Actions -> Update AP Dashboard Data -> Run workflow**.
-5. Confirm both jobs are green:
-   - `Update data from QuickBooks`
-   - `Deploy GitHub Pages`
-
-If OAuth fails, check that the Client ID, Client Secret, Realm ID and Refresh Token all belong to the same Intuit Development app/sandbox authorization.
+## AP logic
+- `Vendor Balance Detail` TOTAL = independent control total.
+- `Net AP` = sum of all non-zero open balances in Vendor Balance Detail.
+- `Gross open bills` = positive open balances where transaction type = Bill.
+- Vendor credits and other adjustments are shown separately.
+- Aging is calculated from positive open Bills only.
+- Account allocation tries, in order: exact Vendor + Invoice + Type, exact Vendor + Invoice, Vendor history, then vendor-map fallback.
+- `Accounts Payable (A/P)` and bank control accounts are excluded from distribution-account classification to avoid double counting.

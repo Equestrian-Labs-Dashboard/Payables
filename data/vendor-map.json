@@ -1,33 +1,178 @@
 {
-  "_comment": "Coincidencia por palabra clave (case-insensitive, substring match) sobre el nombre del vendor en Bill.com. La primera coincidencia gana. Si nada coincide, la factura cae en 'Unclassified' y debe revisarse manualmente.",
+  "_comment": "Fallback only when General Ledger cannot map an open transaction to a QuickBooks distribution account. Account-based classification always has priority.",
   "rules": [
-    { "keyword": "google",        "category": "Advertising" },
-    { "keyword": "meta",          "category": "Advertising" },
-    { "keyword": "facebook",      "category": "Advertising" },
-    { "keyword": "tiktok",        "category": "Advertising" },
-    { "keyword": "shipstation",   "category": "Shipping & Fulfillment" },
-    { "keyword": "fedex",         "category": "Shipping & Fulfillment" },
-    { "keyword": "ups",           "category": "Shipping & Fulfillment" },
-    { "keyword": "usps",          "category": "Shipping & Fulfillment" },
-    { "keyword": "warehouse",     "category": "Shipping & Fulfillment" },
-    { "keyword": "fulfillment",   "category": "Shipping & Fulfillment" },
-    { "keyword": "packaging",     "category": "Shipping & Fulfillment" },
-    { "keyword": "supply",        "category": "Inventory" },
-    { "keyword": "manufactur",    "category": "Inventory" },
-    { "keyword": "textile",       "category": "Inventory" },
-    { "keyword": "leather",       "category": "Inventory" },
-    { "keyword": "consult",       "category": "G&A / OPEX" },
-    { "keyword": "notaria",       "category": "G&A / OPEX" },
-    { "keyword": "legal",         "category": "G&A / OPEX" },
-    { "keyword": "payroll",       "category": "G&A / OPEX" },
-    { "keyword": "gusto",         "category": "G&A / OPEX" },
-    { "keyword": "rent",          "category": "G&A / OPEX" },
-    { "keyword": "software",      "category": "G&A / OPEX" },
-    { "keyword": "saas",          "category": "G&A / OPEX" },
-    { "keyword": "pr agency",     "category": "Sales & Marketing" },
-    { "keyword": "influencer",    "category": "Sales & Marketing" },
-    { "keyword": "content",       "category": "Sales & Marketing" },
-    { "keyword": "event",         "category": "Sales & Marketing" }
+    {
+      "keyword": "horseware",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "rj matthews",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "animal health",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "weatherbeeta",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "synnutra",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "equinavia",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "fhorze",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "enviro equine",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "global international products",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "bhoof",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "a1 worldwide logistics",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "link logistics",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "commission junction",
+      "category": "Advertising"
+    },
+    {
+      "keyword": "angela rauwolf",
+      "category": "Sales & Marketing"
+    },
+    {
+      "keyword": "yotpo",
+      "category": "Sales & Marketing"
+    },
+    {
+      "keyword": "scalenorth",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "google",
+      "category": "Advertising"
+    },
+    {
+      "keyword": "meta",
+      "category": "Advertising"
+    },
+    {
+      "keyword": "facebook",
+      "category": "Advertising"
+    },
+    {
+      "keyword": "tiktok",
+      "category": "Advertising"
+    },
+    {
+      "keyword": "shipstation",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "fedex",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "ups",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "usps",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "warehouse",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "fulfillment",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "packaging",
+      "category": "Shipping & Fulfillment"
+    },
+    {
+      "keyword": "supply",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "manufactur",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "textile",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "leather",
+      "category": "Inventory"
+    },
+    {
+      "keyword": "consult",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "notaria",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "legal",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "payroll",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "gusto",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "rent",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "software",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "saas",
+      "category": "G&A / OPEX"
+    },
+    {
+      "keyword": "pr agency",
+      "category": "Sales & Marketing"
+    },
+    {
+      "keyword": "influencer",
+      "category": "Sales & Marketing"
+    },
+    {
+      "keyword": "content",
+      "category": "Sales & Marketing"
+    },
+    {
+      "keyword": "event",
+      "category": "Sales & Marketing"
+    }
   ],
   "default_category": "Unclassified"
 }
