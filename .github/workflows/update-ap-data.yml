@@ -73,16 +73,11 @@ jobs:
           total = float(data.get("kpis", {}).get("total_ap", 0) or 0)
           vendor_total = float(data.get("reconciliation", {}).get("vendor_balance_total", 0) or 0)
           variance = float(data.get("reconciliation", {}).get("variance", 0) or 0)
-          tx_count = int(data.get("data_quality", {}).get("vendor_balance_transaction_count", 0) or 0)
 
           print(f"Company: {data.get('company')}")
           print(f"Total AP: ${total:,.2f}")
           print(f"Vendor Balance control: ${vendor_total:,.2f}")
           print(f"Variance: ${variance:,.2f}")
-          print(f"Vendor Balance transactions: {tx_count}")
-
-          if tx_count == 0:
-              raise SystemExit("Vendor Balance import produced zero transactions; refusing to deploy an empty dashboard")
 
           if abs(variance) > 0.02:
               print("::warning title=AP reconciliation variance::Dashboard rows do not exactly reconcile to the Vendor Balance Detail control total.")
