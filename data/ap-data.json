@@ -3,7 +3,7 @@
   "source": "coefficient_google_sheets_quickbooks_bill_lines",
   "source_note": "Source: QuickBooks Online (Equestrian Labs) → Coefficient QuickBooks Bill object. Balances are converted to USD using each Bill's Exchange Rate; QuickBooks Bill line accounts drive the account/category allocation.",
   "company": "Equestrian Labs, Inc. (dba Corro)",
-  "generated_at": "2026-08-12T12:58:37.787216+00:00",
+  "generated_at": "2026-08-12T14:32:08.770596+00:00",
   "kpis": {
     "total_ap": 234867.27,
     "gross_open_bills": 234867.27,
