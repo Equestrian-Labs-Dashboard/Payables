@@ -130,25 +130,55 @@ def csv_rows(csv_text):
 
 
 def find_header(rows, required_groups):
-    """Return (index, normalized header map) for the first matching row."""
-    for i, row in enumerate(rows[:80]):
+    """Return (index, header map) for the first matching row.
+
+    Important: Coefficient/QuickBooks can expose duplicate labels such as
+    ``Open balance`` and ``Open Balance``.  The old parser normalized both to
+    the same key and always selected the FIRST column, which can be an empty
+    compatibility field.  We therefore retain *all* matching indexes and let
+    row_value() select the first populated value.
+    """
+    for i, row in enumerate(rows[:100]):
         norms = [norm(c) for c in row]
         if all(any(norm(alias) in norms for alias in aliases) for aliases in required_groups):
             mapping = {}
             for key, aliases in HEADER_ALIASES.items():
-                for alias in aliases:
-                    n = norm(alias)
-                    if n in norms:
-                        mapping[key] = norms.index(n)
-                        break
+                wanted = {norm(a) for a in aliases}
+                indexes = [j for j, n in enumerate(norms) if n in wanted]
+                if indexes:
+                    mapping[key] = indexes
             return i, mapping
     return None, {}
 
 
-def get_cell(row, mapping, key):
-    idx = mapping.get(key)
-    return row[idx] if idx is not None and idx < len(row) else ""
+def get_cells(row, mapping, key):
+    idxs = mapping.get(key, [])
+    if isinstance(idxs, int):
+        idxs = [idxs]
+    return [row[i] if i < len(row) else "" for i in idxs]
 
+
+def get_cell(row, mapping, key):
+    """Return first non-empty duplicate field, preserving legacy behavior."""
+    vals = get_cells(row, mapping, key)
+    for value in vals:
+        if text(value) != "":
+            return value
+    return vals[0] if vals else ""
+
+
+def get_money_cell(row, mapping, *keys):
+    """Return a monetary value from duplicate/fallback columns.
+
+    Zero is considered a valid populated value. Empty cells are skipped.
+    """
+    for key in keys:
+        for value in get_cells(row, mapping, key):
+            raw = text(value)
+            if raw == "" or raw in {"-", "—"}:
+                continue
+            return money(value), key
+    return 0.0, ""
 
 def load_vendor_map():
     try:
@@ -197,29 +227,46 @@ def parse_vendor_balance(csv_text):
     )
     if header_i is None:
         raise ValueError(
-            "Vendor Balance Detail header not found. Expected Date, Transaction type and Open balance columns."
+            "Vendor Balance Detail header not found. Expected Date, Transaction Type and Open Balance columns."
         )
+
+    header_row = rows[header_i]
+    print("Vendor Balance headers:", " | ".join(text(x) for x in header_row if text(x)))
+    if len(h.get("open_balance", [])) > 1:
+        print(f"Detected {len(h['open_balance'])} Open Balance columns; parser will use the first populated value per row.")
 
     company = ""
     for row in rows[:header_i]:
-        if row and text(row[0]) and "vendor balance" not in text(row[0]).lower() and text(row[0]).lower() != "all dates":
-            company = text(row[0])
+        for cell in row:
+            c = text(cell)
+            if c and "vendor balance" not in c.lower() and c.lower() not in {"all dates", "accrual basis"}:
+                company = c
+                break
+        if company:
             break
 
     current_vendor = ""
     transactions = []
     report_total = None
+    transaction_like_rows = 0
+    nonzero_rows = 0
+    value_sources = defaultdict(int)
 
     for row in rows[header_i + 1:]:
         first = text(row[0]) if row else ""
         dt_raw = get_cell(row, h, "date")
         tx_type = text(get_cell(row, h, "transaction_type"))
 
-        if first.upper() == "TOTAL":
-            report_total = money(get_cell(row, h, "open_balance"))
+        # QuickBooks grand total can be either TOTAL or a row whose first populated
+        # cell is TOTAL, depending on the Coefficient export layout.
+        populated = [text(c) for c in row if text(c)]
+        row_label = populated[0] if populated else ""
+        if row_label.upper() == "TOTAL":
+            report_total, source = get_money_cell(row, h, "open_balance", "amount")
+            value_sources[f"report_total:{source or 'none'}"] += 1
             continue
 
-        # QuickBooks report vendor group row, e.g. "Animal Health International"
+        # Vendor section row such as "Animal Health International".
         if first and not dt_raw and not tx_type and not first.lower().startswith("total for "):
             current_vendor = first
             continue
@@ -227,26 +274,47 @@ def parse_vendor_balance(csv_text):
         if not dt_raw or not tx_type:
             continue
 
+        transaction_like_rows += 1
         vendor = text(get_cell(row, h, "name")) or current_vendor
-        open_balance = money(get_cell(row, h, "open_balance"))
+
+        # Coefficient currently exposes duplicate QuickBooks labels (Open balance /
+        # Open Balance). Some accounts populate only one of them. Prefer any populated
+        # Open Balance field, then Amount. Balance is a running vendor balance and is
+        # intentionally NOT used as a transaction open balance.
+        open_balance, source = get_money_cell(row, h, "open_balance", "amount")
+        value_sources[source or "none"] += 1
         if abs(open_balance) < 0.005:
             continue
+        nonzero_rows += 1
 
+        original_amount, _ = get_money_cell(row, h, "amount")
         transactions.append({
             "vendor": vendor or "Unknown vendor",
             "transaction_type": tx_type,
             "invoice_number": text(get_cell(row, h, "num")),
             "invoice_date": parse_date(dt_raw),
             "due_date": parse_date(get_cell(row, h, "due_date")),
-            "original_amount": money(get_cell(row, h, "amount")),
+            "original_amount": original_amount,
             "open_balance": round(open_balance, 2),
         })
 
-    if report_total is None:
+    print(f"Vendor Balance transaction rows detected: {transaction_like_rows}; non-zero open rows parsed: {nonzero_rows}")
+    print("Vendor Balance value sources:", dict(value_sources))
+
+    # Never publish a false $0 / Reconciled dashboard when the report visibly
+    # contains transactions but Coefficient returned blank money fields.
+    if transaction_like_rows > 0 and nonzero_rows == 0:
+        raise ValueError(
+            "Vendor Balance Detail contains transaction rows but Amount/Open Balance are blank or zero. "
+            "In Coefficient edit the import and include the populated Amount and Open Balance fields, then Refresh. "
+            "The workflow is stopping instead of publishing an incorrect $0 dashboard."
+        )
+
+    if report_total is None or (abs(report_total) < 0.005 and transactions):
         report_total = round(sum(t["open_balance"] for t in transactions), 2)
+        print(f"Vendor Balance TOTAL was blank; calculated control total from open rows: ${report_total:,.2f}")
 
     return company, transactions, round(report_total, 2)
-
 
 def gl_account_is_distribution(account):
     a = text(account).lower()
@@ -561,6 +629,7 @@ def build_dashboard(vendor_csv, gl_csv=""):
             "available_vendor_credits": round(abs(vendor_credit_balance), 2),
             "other_adjustments": round(non_bill_adjustments - vendor_credit_balance, 2),
             "gl_usable_rows": int(gl.get("usable_rows", 0)),
+            "vendor_balance_transaction_count": len(txs),
         },
     }
     return result
