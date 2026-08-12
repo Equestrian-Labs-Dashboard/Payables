@@ -3,7 +3,7 @@
   "source": "coefficient_google_sheets_quickbooks_bill_lines",
   "source_note": "Source: QuickBooks Online (Equestrian Labs) → Coefficient QuickBooks Bill object. Balances are converted to USD using each Bill's Exchange Rate; QuickBooks Bill line accounts drive the account/category allocation.",
   "company": "Equestrian Labs, Inc. (dba Corro)",
-  "generated_at": "2026-08-12T12:55:04.945182+00:00",
+  "generated_at": "2026-08-12T12:58:37.787216+00:00",
   "kpis": {
     "total_ap": 234867.27,
     "gross_open_bills": 234867.27,
@@ -8767,7 +8767,7 @@
     {
       "id": "9042",
       "vendor": "Writer's Bloch",
-      "invoice_number": "2020-05-05 00:00:00",
+      "invoice_number": "May 5, 2020",
       "invoice_date": "2020-05-05",
       "due_date": "2020-05-30",
       "currency": "USD",
@@ -12529,7 +12529,7 @@
     {
       "id": "14452",
       "vendor": "Drew Rudebusch (Vendor) (deleted)",
-      "invoice_number": "2020-08-10 00:00:00",
+      "invoice_number": "08/10/2020",
       "invoice_date": "2020-08-10",
       "due_date": "2020-08-10",
       "currency": "USD",
@@ -17245,7 +17245,7 @@
     {
       "id": "17644",
       "vendor": "Insperity (deleted)",
-      "invoice_number": "2020-10-01 00:00:00",
+      "invoice_number": "10/01/2020",
       "invoice_date": "2020-10-01",
       "due_date": "2020-10-11",
       "currency": "USD",
@@ -39187,7 +39187,7 @@
     {
       "id": "33827",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2021-01-28 00:00:00",
+      "invoice_number": "01/28/21",
       "invoice_date": "2021-01-28",
       "due_date": "2021-02-27",
       "currency": "USD",
@@ -62461,7 +62461,7 @@
     {
       "id": "57685",
       "vendor": "Brody Robertson Showjumps (deleted)",
-      "invoice_number": "2021-05-28 00:00:00",
+      "invoice_number": "2021-05-28",
       "invoice_date": "2021-05-28",
       "due_date": "2021-05-28",
       "currency": "USD",
@@ -70111,7 +70111,7 @@
     {
       "id": "65050",
       "vendor": "Emily Oatis (deleted)",
-      "invoice_number": "2021-07-01 00:00:00",
+      "invoice_number": "2021-07",
       "invoice_date": "2021-07-10",
       "due_date": "2021-07-10",
       "currency": "USD",
@@ -72720,7 +72720,7 @@
     },
     {
       "id": "64887",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "567191",
       "invoice_date": "2021-07-23",
       "due_date": "2021-07-23",
@@ -73746,7 +73746,7 @@
     },
     {
       "id": "64888",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "567763",
       "invoice_date": "2021-07-29",
       "due_date": "2021-07-29",
@@ -75744,7 +75744,7 @@
     },
     {
       "id": "69872",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "568481",
       "invoice_date": "2021-08-06",
       "due_date": "2021-08-06",
@@ -76716,7 +76716,7 @@
     },
     {
       "id": "69875",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "569198",
       "invoice_date": "2021-08-16",
       "due_date": "2021-08-16",
@@ -76734,7 +76734,7 @@
     },
     {
       "id": "69874",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "569202",
       "invoice_date": "2021-08-16",
       "due_date": "2021-08-16",
@@ -76752,7 +76752,7 @@
     },
     {
       "id": "69873",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "569200",
       "invoice_date": "2021-08-16",
       "due_date": "2021-08-16",
@@ -80352,7 +80352,7 @@
     },
     {
       "id": "71965",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "570503",
       "invoice_date": "2021-09-03",
       "due_date": "2021-09-03",
@@ -81414,7 +81414,7 @@
     },
     {
       "id": "71962",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571082",
       "invoice_date": "2021-09-10",
       "due_date": "2021-09-10",
@@ -81432,7 +81432,7 @@
     },
     {
       "id": "71961",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571096",
       "invoice_date": "2021-09-10",
       "due_date": "2021-09-10",
@@ -81558,7 +81558,7 @@
     },
     {
       "id": "71963",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571258",
       "invoice_date": "2021-09-13",
       "due_date": "2021-09-13",
@@ -81828,7 +81828,7 @@
     },
     {
       "id": "71966",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571146",
       "invoice_date": "2021-09-13",
       "due_date": "2021-09-13",
@@ -82944,7 +82944,7 @@
     },
     {
       "id": "71964",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571787",
       "invoice_date": "2021-09-21",
       "due_date": "2021-09-21",
@@ -83916,7 +83916,7 @@
     },
     {
       "id": "71967",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "572339",
       "invoice_date": "2021-09-27",
       "due_date": "2021-09-27",
@@ -85032,7 +85032,7 @@
     },
     {
       "id": "77623",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "573008",
       "invoice_date": "2021-10-05",
       "due_date": "2021-10-05",
@@ -85050,7 +85050,7 @@
     },
     {
       "id": "77622",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "572961",
       "invoice_date": "2021-10-05",
       "due_date": "2021-10-05",
@@ -85267,7 +85267,7 @@
     {
       "id": "77557",
       "vendor": "Dave Altarescu (deleted)",
-      "invoice_number": "2021-10-05 00:00:00",
+      "invoice_number": "10/05/2021",
       "invoice_date": "2021-10-05",
       "due_date": "2021-10-05",
       "currency": "USD",
@@ -87516,7 +87516,7 @@
     },
     {
       "id": "77628",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "572339-1",
       "invoice_date": "2021-10-19",
       "due_date": "2021-10-19",
@@ -87534,7 +87534,7 @@
     },
     {
       "id": "77627",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "571146-1",
       "invoice_date": "2021-10-19",
       "due_date": "2021-10-19",
@@ -87552,7 +87552,7 @@
     },
     {
       "id": "77626",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "567191-1",
       "invoice_date": "2021-10-19",
       "due_date": "2021-10-19",
@@ -87570,7 +87570,7 @@
     },
     {
       "id": "77625",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "570503-1",
       "invoice_date": "2021-10-19",
       "due_date": "2021-10-19",
@@ -88704,7 +88704,7 @@
     },
     {
       "id": "77629",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "574522",
       "invoice_date": "2021-10-25",
       "due_date": "2021-10-25",
@@ -89496,7 +89496,7 @@
     },
     {
       "id": "77624",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "574886",
       "invoice_date": "2021-10-28",
       "due_date": "2021-10-28",
@@ -91116,7 +91116,7 @@
     },
     {
       "id": "85951",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "575466",
       "invoice_date": "2021-11-04",
       "due_date": "2021-11-04",
@@ -91188,7 +91188,7 @@
     },
     {
       "id": "86061",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100267",
       "invoice_date": "2021-11-04",
       "due_date": "2021-11-04",
@@ -91206,7 +91206,7 @@
     },
     {
       "id": "86060",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100268",
       "invoice_date": "2021-11-04",
       "due_date": "2021-11-04",
@@ -91224,7 +91224,7 @@
     },
     {
       "id": "86059",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100269",
       "invoice_date": "2021-11-04",
       "due_date": "2021-11-04",
@@ -91926,7 +91926,7 @@
     },
     {
       "id": "85952",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "575753",
       "invoice_date": "2021-11-09",
       "due_date": "2021-11-09",
@@ -92592,7 +92592,7 @@
     },
     {
       "id": "85965",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576054",
       "invoice_date": "2021-11-12",
       "due_date": "2021-11-12",
@@ -93024,7 +93024,7 @@
     },
     {
       "id": "85953",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576268",
       "invoice_date": "2021-11-15",
       "due_date": "2021-11-15",
@@ -94374,7 +94374,7 @@
     },
     {
       "id": "85956",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576870",
       "invoice_date": "2021-11-22",
       "due_date": "2021-11-22",
@@ -94392,7 +94392,7 @@
     },
     {
       "id": "85955",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576867",
       "invoice_date": "2021-11-22",
       "due_date": "2021-11-22",
@@ -94410,7 +94410,7 @@
     },
     {
       "id": "85954",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576871",
       "invoice_date": "2021-11-22",
       "due_date": "2021-11-22",
@@ -94788,7 +94788,7 @@
     },
     {
       "id": "85958",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577134",
       "invoice_date": "2021-11-24",
       "due_date": "2021-11-24",
@@ -94806,7 +94806,7 @@
     },
     {
       "id": "85957",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577135",
       "invoice_date": "2021-11-24",
       "due_date": "2021-11-24",
@@ -95454,7 +95454,7 @@
     },
     {
       "id": "111258",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577630",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95472,7 +95472,7 @@
     },
     {
       "id": "85966",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577221",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95490,7 +95490,7 @@
     },
     {
       "id": "85962",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577220",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95508,7 +95508,7 @@
     },
     {
       "id": "85961",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577222",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95526,7 +95526,7 @@
     },
     {
       "id": "85960",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577610",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95544,7 +95544,7 @@
     },
     {
       "id": "85959",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577622",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -95634,7 +95634,7 @@
     },
     {
       "id": "111259",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577626",
       "invoice_date": "2021-11-29",
       "due_date": "2021-11-29",
@@ -96066,7 +96066,7 @@
     },
     {
       "id": "111276",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577938",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96084,7 +96084,7 @@
     },
     {
       "id": "111275",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577933",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96102,7 +96102,7 @@
     },
     {
       "id": "111274",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577930",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96120,7 +96120,7 @@
     },
     {
       "id": "111260",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577624",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96138,7 +96138,7 @@
     },
     {
       "id": "85964",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577614",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96156,7 +96156,7 @@
     },
     {
       "id": "85963",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577617",
       "invoice_date": "2021-11-30",
       "due_date": "2021-11-30",
@@ -96930,7 +96930,7 @@
     },
     {
       "id": "94327",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577935",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -96948,7 +96948,7 @@
     },
     {
       "id": "94326",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577612",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -96966,7 +96966,7 @@
     },
     {
       "id": "94325",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577923",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -96984,7 +96984,7 @@
     },
     {
       "id": "94324",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577619",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97002,7 +97002,7 @@
     },
     {
       "id": "94323",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577609",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97020,7 +97020,7 @@
     },
     {
       "id": "94322",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578107",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97038,7 +97038,7 @@
     },
     {
       "id": "94321",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "577926",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97182,7 +97182,7 @@
     },
     {
       "id": "86130",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "574673",
       "invoice_date": "2021-11-01",
       "due_date": "2021-12-01",
@@ -97218,7 +97218,7 @@
     },
     {
       "id": "94432",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100304",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97236,7 +97236,7 @@
     },
     {
       "id": "94431",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100302",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97254,7 +97254,7 @@
     },
     {
       "id": "94430",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100303",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97272,7 +97272,7 @@
     },
     {
       "id": "94429",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100305",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97290,7 +97290,7 @@
     },
     {
       "id": "94428",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100306",
       "invoice_date": "2021-12-01",
       "due_date": "2021-12-01",
@@ -97416,7 +97416,7 @@
     },
     {
       "id": "94328",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578099",
       "invoice_date": "2021-12-02",
       "due_date": "2021-12-02",
@@ -97740,7 +97740,7 @@
     },
     {
       "id": "94332",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578235",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -97758,7 +97758,7 @@
     },
     {
       "id": "94331",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578228",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -97776,7 +97776,7 @@
     },
     {
       "id": "94330",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578232",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -97794,7 +97794,7 @@
     },
     {
       "id": "94329",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578293",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -97812,7 +97812,7 @@
     },
     {
       "id": "94564",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "W39960",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -97830,7 +97830,7 @@
     },
     {
       "id": "94310",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578170",
       "invoice_date": "2021-12-03",
       "due_date": "2021-12-03",
@@ -98010,7 +98010,7 @@
     },
     {
       "id": "94334",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578585",
       "invoice_date": "2021-12-06",
       "due_date": "2021-12-06",
@@ -98028,7 +98028,7 @@
     },
     {
       "id": "94333",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578586",
       "invoice_date": "2021-12-06",
       "due_date": "2021-12-06",
@@ -98208,7 +98208,7 @@
     },
     {
       "id": "94335",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578693",
       "invoice_date": "2021-12-07",
       "due_date": "2021-12-07",
@@ -98532,7 +98532,7 @@
     },
     {
       "id": "94338",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578800",
       "invoice_date": "2021-12-08",
       "due_date": "2021-12-08",
@@ -98550,7 +98550,7 @@
     },
     {
       "id": "94337",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578801",
       "invoice_date": "2021-12-08",
       "due_date": "2021-12-08",
@@ -98568,7 +98568,7 @@
     },
     {
       "id": "94336",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578802",
       "invoice_date": "2021-12-08",
       "due_date": "2021-12-08",
@@ -99144,7 +99144,7 @@
     },
     {
       "id": "94340",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579110",
       "invoice_date": "2021-12-10",
       "due_date": "2021-12-10",
@@ -99162,7 +99162,7 @@
     },
     {
       "id": "94339",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579077",
       "invoice_date": "2021-12-10",
       "due_date": "2021-12-10",
@@ -99720,7 +99720,7 @@
     },
     {
       "id": "94344",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579349",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -99738,7 +99738,7 @@
     },
     {
       "id": "94343",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579400",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -99756,7 +99756,7 @@
     },
     {
       "id": "94342",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579351",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -99774,7 +99774,7 @@
     },
     {
       "id": "94341",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579350",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -99792,7 +99792,7 @@
     },
     {
       "id": "94312",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "570503-2",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -99810,7 +99810,7 @@
     },
     {
       "id": "94311",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576054-1",
       "invoice_date": "2021-12-14",
       "due_date": "2021-12-14",
@@ -100062,7 +100062,7 @@
     },
     {
       "id": "94346",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579502",
       "invoice_date": "2021-12-15",
       "due_date": "2021-12-15",
@@ -100080,7 +100080,7 @@
     },
     {
       "id": "94345",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579503",
       "invoice_date": "2021-12-15",
       "due_date": "2021-12-15",
@@ -100674,7 +100674,7 @@
     },
     {
       "id": "94314",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579639",
       "invoice_date": "2021-12-16",
       "due_date": "2021-12-16",
@@ -100692,7 +100692,7 @@
     },
     {
       "id": "94313",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579235",
       "invoice_date": "2021-12-16",
       "due_date": "2021-12-16",
@@ -100818,7 +100818,7 @@
     },
     {
       "id": "94433",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "2100323",
       "invoice_date": "2021-12-16",
       "due_date": "2021-12-16",
@@ -100872,7 +100872,7 @@
     },
     {
       "id": "94347",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579708",
       "invoice_date": "2021-12-17",
       "due_date": "2021-12-17",
@@ -101142,7 +101142,7 @@
     },
     {
       "id": "94349",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579936",
       "invoice_date": "2021-12-20",
       "due_date": "2021-12-20",
@@ -101160,7 +101160,7 @@
     },
     {
       "id": "94348",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579935",
       "invoice_date": "2021-12-20",
       "due_date": "2021-12-20",
@@ -101520,7 +101520,7 @@
     },
     {
       "id": "94351",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580129",
       "invoice_date": "2021-12-22",
       "due_date": "2021-12-22",
@@ -101538,7 +101538,7 @@
     },
     {
       "id": "94350",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580145",
       "invoice_date": "2021-12-22",
       "due_date": "2021-12-22",
@@ -101556,7 +101556,7 @@
     },
     {
       "id": "94317",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "570503-3",
       "invoice_date": "2021-12-22",
       "due_date": "2021-12-22",
@@ -101574,7 +101574,7 @@
     },
     {
       "id": "94316",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "574522-1",
       "invoice_date": "2021-12-22",
       "due_date": "2021-12-22",
@@ -101592,7 +101592,7 @@
     },
     {
       "id": "94315",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578170-1",
       "invoice_date": "2021-12-22",
       "due_date": "2021-12-22",
@@ -101826,7 +101826,7 @@
     },
     {
       "id": "94318",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "576054-2",
       "invoice_date": "2021-12-23",
       "due_date": "2021-12-23",
@@ -102312,7 +102312,7 @@
     },
     {
       "id": "94352",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580129-1",
       "invoice_date": "2021-12-28",
       "due_date": "2021-12-28",
@@ -102330,7 +102330,7 @@
     },
     {
       "id": "94319",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578170-2",
       "invoice_date": "2021-12-28",
       "due_date": "2021-12-28",
@@ -102456,7 +102456,7 @@
     },
     {
       "id": "94320",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579235-1",
       "invoice_date": "2021-12-28",
       "due_date": "2021-12-28",
@@ -102474,7 +102474,7 @@
     },
     {
       "id": "94355",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580663",
       "invoice_date": "2021-12-29",
       "due_date": "2021-12-29",
@@ -102492,7 +102492,7 @@
     },
     {
       "id": "94354",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580665",
       "invoice_date": "2021-12-29",
       "due_date": "2021-12-29",
@@ -102510,7 +102510,7 @@
     },
     {
       "id": "94353",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580664",
       "invoice_date": "2021-12-29",
       "due_date": "2021-12-29",
@@ -103860,7 +103860,7 @@
     },
     {
       "id": "97963",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580989",
       "invoice_date": "2022-01-04",
       "due_date": "2022-01-04",
@@ -103878,7 +103878,7 @@
     },
     {
       "id": "97962",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580990",
       "invoice_date": "2022-01-04",
       "due_date": "2022-01-04",
@@ -103896,7 +103896,7 @@
     },
     {
       "id": "97961",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580988",
       "invoice_date": "2022-01-04",
       "due_date": "2022-01-04",
@@ -103914,7 +103914,7 @@
     },
     {
       "id": "97960",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "580975",
       "invoice_date": "2022-01-04",
       "due_date": "2022-01-04",
@@ -104004,7 +104004,7 @@
     },
     {
       "id": "97965",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581143",
       "invoice_date": "2022-01-05",
       "due_date": "2022-01-05",
@@ -104022,7 +104022,7 @@
     },
     {
       "id": "97964",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581216",
       "invoice_date": "2022-01-05",
       "due_date": "2022-01-05",
@@ -104292,7 +104292,7 @@
     },
     {
       "id": "97967",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581334",
       "invoice_date": "2022-01-06",
       "due_date": "2022-01-06",
@@ -104310,7 +104310,7 @@
     },
     {
       "id": "97966",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581337",
       "invoice_date": "2022-01-06",
       "due_date": "2022-01-06",
@@ -104328,7 +104328,7 @@
     },
     {
       "id": "94642",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578680",
       "invoice_date": "2021-12-07",
       "due_date": "2022-01-06",
@@ -104346,7 +104346,7 @@
     },
     {
       "id": "94641",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "578714",
       "invoice_date": "2021-12-07",
       "due_date": "2022-01-06",
@@ -104616,7 +104616,7 @@
     },
     {
       "id": "97968",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581336",
       "invoice_date": "2022-01-07",
       "due_date": "2022-01-07",
@@ -104814,7 +104814,7 @@
     },
     {
       "id": "97971",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581598",
       "invoice_date": "2022-01-10",
       "due_date": "2022-01-10",
@@ -104832,7 +104832,7 @@
     },
     {
       "id": "97970",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581502",
       "invoice_date": "2022-01-10",
       "due_date": "2022-01-10",
@@ -104850,7 +104850,7 @@
     },
     {
       "id": "97969",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581599",
       "invoice_date": "2022-01-10",
       "due_date": "2022-01-10",
@@ -107262,7 +107262,7 @@
     },
     {
       "id": "94640",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "579307",
       "invoice_date": "2021-12-30",
       "due_date": "2022-01-29",
@@ -107875,7 +107875,7 @@
     {
       "id": "103169",
       "vendor": "Susan Bowers (deleted)",
-      "invoice_number": "2022-02-05 00:00:00",
+      "invoice_number": "2-5-2022",
       "invoice_date": "2022-02-05",
       "due_date": "2022-02-05",
       "currency": "USD",
@@ -108324,7 +108324,7 @@
     },
     {
       "id": "103695",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581798",
       "invoice_date": "2022-01-12",
       "due_date": "2022-02-11",
@@ -108342,7 +108342,7 @@
     },
     {
       "id": "103694",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581702",
       "invoice_date": "2022-01-12",
       "due_date": "2022-02-11",
@@ -108360,7 +108360,7 @@
     },
     {
       "id": "103693",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581701",
       "invoice_date": "2022-01-12",
       "due_date": "2022-02-11",
@@ -108504,7 +108504,7 @@
     },
     {
       "id": "103696",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581867",
       "invoice_date": "2022-01-13",
       "due_date": "2022-02-12",
@@ -108666,7 +108666,7 @@
     },
     {
       "id": "103697",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "581991",
       "invoice_date": "2022-01-14",
       "due_date": "2022-02-13",
@@ -109027,7 +109027,7 @@
     {
       "id": "110446",
       "vendor": "Brody Robertson Showjumps (deleted)",
-      "invoice_number": "2022-02-15 00:00:00",
+      "invoice_number": "02-15-2022",
       "invoice_date": "2022-02-15",
       "due_date": "2022-02-15",
       "currency": "USD",
@@ -109332,7 +109332,7 @@
     },
     {
       "id": "103698",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582165",
       "invoice_date": "2022-01-18",
       "due_date": "2022-02-17",
@@ -109440,7 +109440,7 @@
     },
     {
       "id": "103701",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582340",
       "invoice_date": "2022-01-19",
       "due_date": "2022-02-18",
@@ -109458,7 +109458,7 @@
     },
     {
       "id": "103700",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582339",
       "invoice_date": "2022-01-19",
       "due_date": "2022-02-18",
@@ -109476,7 +109476,7 @@
     },
     {
       "id": "103699",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582310",
       "invoice_date": "2022-01-19",
       "due_date": "2022-02-18",
@@ -109584,7 +109584,7 @@
     },
     {
       "id": "103703",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582491",
       "invoice_date": "2022-01-21",
       "due_date": "2022-02-20",
@@ -109602,7 +109602,7 @@
     },
     {
       "id": "103702",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582411",
       "invoice_date": "2022-01-21",
       "due_date": "2022-02-20",
@@ -109728,7 +109728,7 @@
     },
     {
       "id": "103704",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582613",
       "invoice_date": "2022-01-24",
       "due_date": "2022-02-23",
@@ -110376,7 +110376,7 @@
     },
     {
       "id": "103708",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582950",
       "invoice_date": "2022-01-27",
       "due_date": "2022-02-26",
@@ -110394,7 +110394,7 @@
     },
     {
       "id": "103707",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582949",
       "invoice_date": "2022-01-27",
       "due_date": "2022-02-26",
@@ -110412,7 +110412,7 @@
     },
     {
       "id": "103706",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582895",
       "invoice_date": "2022-01-27",
       "due_date": "2022-02-26",
@@ -110430,7 +110430,7 @@
     },
     {
       "id": "103705",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "582892",
       "invoice_date": "2022-01-27",
       "due_date": "2022-02-26",
@@ -110646,7 +110646,7 @@
     },
     {
       "id": "103710",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583087",
       "invoice_date": "2022-01-28",
       "due_date": "2022-02-27",
@@ -110664,7 +110664,7 @@
     },
     {
       "id": "103709",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583053",
       "invoice_date": "2022-01-28",
       "due_date": "2022-02-27",
@@ -111258,7 +111258,7 @@
     },
     {
       "id": "103715",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583308",
       "invoice_date": "2022-02-01",
       "due_date": "2022-03-03",
@@ -111276,7 +111276,7 @@
     },
     {
       "id": "103714",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583183",
       "invoice_date": "2022-02-01",
       "due_date": "2022-03-03",
@@ -111294,7 +111294,7 @@
     },
     {
       "id": "103713",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583182",
       "invoice_date": "2022-02-01",
       "due_date": "2022-03-03",
@@ -111312,7 +111312,7 @@
     },
     {
       "id": "103712",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583181",
       "invoice_date": "2022-02-01",
       "due_date": "2022-03-03",
@@ -111330,7 +111330,7 @@
     },
     {
       "id": "103711",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583180",
       "invoice_date": "2022-02-01",
       "due_date": "2022-03-03",
@@ -111618,7 +111618,7 @@
     },
     {
       "id": "103745",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583425",
       "invoice_date": "2022-02-03",
       "due_date": "2022-03-05",
@@ -111636,7 +111636,7 @@
     },
     {
       "id": "103744",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583424",
       "invoice_date": "2022-02-03",
       "due_date": "2022-03-05",
@@ -112050,7 +112050,7 @@
     },
     {
       "id": "103746",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583471",
       "invoice_date": "2022-02-07",
       "due_date": "2022-03-09",
@@ -112248,7 +112248,7 @@
     },
     {
       "id": "103750",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583724",
       "invoice_date": "2022-02-08",
       "due_date": "2022-03-10",
@@ -112266,7 +112266,7 @@
     },
     {
       "id": "103749",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583602",
       "invoice_date": "2022-02-08",
       "due_date": "2022-03-10",
@@ -112284,7 +112284,7 @@
     },
     {
       "id": "103748",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583601",
       "invoice_date": "2022-02-08",
       "due_date": "2022-03-10",
@@ -112878,7 +112878,7 @@
     },
     {
       "id": "103751",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583846",
       "invoice_date": "2022-02-10",
       "due_date": "2022-03-12",
@@ -112896,7 +112896,7 @@
     },
     {
       "id": "103747",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583554",
       "invoice_date": "2022-02-10",
       "due_date": "2022-03-12",
@@ -113040,7 +113040,7 @@
     },
     {
       "id": "103753",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583991",
       "invoice_date": "2022-02-11",
       "due_date": "2022-03-13",
@@ -113058,7 +113058,7 @@
     },
     {
       "id": "103752",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "583990",
       "invoice_date": "2022-02-11",
       "due_date": "2022-03-13",
@@ -113526,7 +113526,7 @@
     },
     {
       "id": "103754",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584110",
       "invoice_date": "2022-02-14",
       "due_date": "2022-03-16",
@@ -113796,7 +113796,7 @@
     },
     {
       "id": "103756",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584179",
       "invoice_date": "2022-02-15",
       "due_date": "2022-03-17",
@@ -113814,7 +113814,7 @@
     },
     {
       "id": "103755",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584176",
       "invoice_date": "2022-02-15",
       "due_date": "2022-03-17",
@@ -114300,7 +114300,7 @@
     },
     {
       "id": "103757",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584336",
       "invoice_date": "2022-02-17",
       "due_date": "2022-03-19",
@@ -114426,7 +114426,7 @@
     },
     {
       "id": "103759",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584430",
       "invoice_date": "2022-02-18",
       "due_date": "2022-03-20",
@@ -114444,7 +114444,7 @@
     },
     {
       "id": "103758",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584429",
       "invoice_date": "2022-02-18",
       "due_date": "2022-03-20",
@@ -114822,7 +114822,7 @@
     },
     {
       "id": "103763",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584752",
       "invoice_date": "2022-02-23",
       "due_date": "2022-03-25",
@@ -114840,7 +114840,7 @@
     },
     {
       "id": "103762",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584672",
       "invoice_date": "2022-02-23",
       "due_date": "2022-03-25",
@@ -114858,7 +114858,7 @@
     },
     {
       "id": "103761",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584671",
       "invoice_date": "2022-02-23",
       "due_date": "2022-03-25",
@@ -114876,7 +114876,7 @@
     },
     {
       "id": "103760",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584670",
       "invoice_date": "2022-02-23",
       "due_date": "2022-03-25",
@@ -114912,7 +114912,7 @@
     },
     {
       "id": "103764",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584853",
       "invoice_date": "2022-02-24",
       "due_date": "2022-03-26",
@@ -114930,7 +114930,7 @@
     },
     {
       "id": "103765",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "584854",
       "invoice_date": "2022-02-24",
       "due_date": "2022-03-26",
@@ -115272,7 +115272,7 @@
     },
     {
       "id": "103768",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585069",
       "invoice_date": "2022-02-28",
       "due_date": "2022-03-30",
@@ -115290,7 +115290,7 @@
     },
     {
       "id": "103767",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585068",
       "invoice_date": "2022-02-28",
       "due_date": "2022-03-30",
@@ -115308,7 +115308,7 @@
     },
     {
       "id": "103766",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585066",
       "invoice_date": "2022-02-28",
       "due_date": "2022-03-30",
@@ -116082,7 +116082,7 @@
     },
     {
       "id": "109971",
-      "vendor": "Uncle Jimmy’s Brand Products, LLC (deleted)",
+      "vendor": "Uncle Jimmyâs Brand Products, LLC (deleted)",
       "invoice_number": "22-00041",
       "invoice_date": "2022-03-04",
       "due_date": "2022-04-03",
@@ -116100,7 +116100,7 @@
     },
     {
       "id": "107789",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585388",
       "invoice_date": "2022-03-04",
       "due_date": "2022-04-03",
@@ -116550,7 +116550,7 @@
     },
     {
       "id": "107792",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585610",
       "invoice_date": "2022-03-09",
       "due_date": "2022-04-08",
@@ -116568,7 +116568,7 @@
     },
     {
       "id": "107791",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585609",
       "invoice_date": "2022-03-09",
       "due_date": "2022-04-08",
@@ -116586,7 +116586,7 @@
     },
     {
       "id": "107790",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585608",
       "invoice_date": "2022-03-09",
       "due_date": "2022-04-08",
@@ -116694,7 +116694,7 @@
     },
     {
       "id": "107793",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585785",
       "invoice_date": "2022-03-10",
       "due_date": "2022-04-09",
@@ -116856,7 +116856,7 @@
     },
     {
       "id": "107794",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "585921",
       "invoice_date": "2022-03-11",
       "due_date": "2022-04-10",
@@ -117018,7 +117018,7 @@
     },
     {
       "id": "107796",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586081",
       "invoice_date": "2022-03-15",
       "due_date": "2022-04-14",
@@ -117036,7 +117036,7 @@
     },
     {
       "id": "107795",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586079",
       "invoice_date": "2022-03-15",
       "due_date": "2022-04-14",
@@ -117162,7 +117162,7 @@
     },
     {
       "id": "109979",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586171",
       "invoice_date": "2022-03-16",
       "due_date": "2022-04-15",
@@ -117216,7 +117216,7 @@
     },
     {
       "id": "109982",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586265",
       "invoice_date": "2022-03-17",
       "due_date": "2022-04-16",
@@ -117234,7 +117234,7 @@
     },
     {
       "id": "109981",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586264",
       "invoice_date": "2022-03-17",
       "due_date": "2022-04-16",
@@ -117288,7 +117288,7 @@
     },
     {
       "id": "109986",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586367",
       "invoice_date": "2022-03-18",
       "due_date": "2022-04-17",
@@ -117594,7 +117594,7 @@
     },
     {
       "id": "109990",
-      "vendor": "Jack’s Inc. (deleted)",
+      "vendor": "Jackâs Inc. (deleted)",
       "invoice_number": "586747",
       "invoice_date": "2022-03-24",
       "due_date": "2022-04-23",
@@ -118567,7 +118567,7 @@
     {
       "id": "114075",
       "vendor": "National Partners PFco, LLC (deleted)",
-      "invoice_number": "2022-05-31 00:00:00",
+      "invoice_number": "05-31-2022",
       "invoice_date": "2022-05-31",
       "due_date": "2022-06-21",
       "currency": "USD",
@@ -118765,7 +118765,7 @@
     {
       "id": "114076",
       "vendor": "National Partners PFco, LLC (deleted)",
-      "invoice_number": "2022-06-27 00:00:00",
+      "invoice_number": "06-27-2022",
       "invoice_date": "2022-06-27",
       "due_date": "2022-07-21",
       "currency": "USD",
@@ -119665,7 +119665,7 @@
     {
       "id": "126394",
       "vendor": "MIDTOWN REALTY GROUP LLC",
-      "invoice_number": "2026-09-23 00:00:00",
+      "invoice_number": "September23",
       "invoice_date": "2023-08-20",
       "due_date": "2023-08-20",
       "currency": "USD",
@@ -120277,7 +120277,7 @@
     {
       "id": "126640",
       "vendor": "MIDTOWN REALTY GROUP LLC",
-      "invoice_number": "2023-10-01 00:00:00",
+      "invoice_number": "10/01/2023",
       "invoice_date": "2023-09-20",
       "due_date": "2023-10-01",
       "currency": "USD",
@@ -120295,7 +120295,7 @@
     {
       "id": "126639",
       "vendor": "MIDTOWN REALTY GROUP LLC",
-      "invoice_number": "2023-10-01 00:00:00",
+      "invoice_number": "10/01/2023",
       "invoice_date": "2023-09-20",
       "due_date": "2023-10-01",
       "currency": "USD",
@@ -120961,7 +120961,7 @@
     {
       "id": "128190",
       "vendor": "Lisa Veltri",
-      "invoice_number": "2023-11-14 00:00:00",
+      "invoice_number": "11/14/2023",
       "invoice_date": "2023-11-14",
       "due_date": "2023-11-14",
       "currency": "USD",
@@ -121141,7 +121141,7 @@
     {
       "id": "128311",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-11-20 00:00:00",
+      "invoice_number": "11/20/2023",
       "invoice_date": "2023-11-20",
       "due_date": "2023-11-20",
       "currency": "USD",
@@ -121159,7 +121159,7 @@
     {
       "id": "128310",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-11-20 00:00:00",
+      "invoice_number": "11/20/2023",
       "invoice_date": "2023-11-20",
       "due_date": "2023-11-20",
       "currency": "USD",
@@ -121213,7 +121213,7 @@
     {
       "id": "128420",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-11-27 00:00:00",
+      "invoice_number": "11/27/2023",
       "invoice_date": "2023-11-27",
       "due_date": "2023-11-27",
       "currency": "USD",
@@ -121267,7 +121267,7 @@
     {
       "id": "128312",
       "vendor": "MIDTOWN REALTY GROUP LLC",
-      "invoice_number": "2023-12-01 00:00:00",
+      "invoice_number": "12/01/2023",
       "invoice_date": "2023-11-20",
       "due_date": "2023-12-01",
       "currency": "USD",
@@ -121357,7 +121357,7 @@
     {
       "id": "128588",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-12-06 00:00:00",
+      "invoice_number": "12/06/2023",
       "invoice_date": "2023-12-06",
       "due_date": "2023-12-06",
       "currency": "USD",
@@ -121483,7 +121483,7 @@
     {
       "id": "128439",
       "vendor": "Equine Dreaming (deleted)",
-      "invoice_number": "2023-12-14 00:00:00",
+      "invoice_number": "12/14/2023",
       "invoice_date": "2023-12-14",
       "due_date": "2023-12-14",
       "currency": "USD",
@@ -121537,7 +121537,7 @@
     {
       "id": "129496",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-12-15 00:00:00",
+      "invoice_number": "12/15/2023",
       "invoice_date": "2023-12-15",
       "due_date": "2023-12-15",
       "currency": "USD",
@@ -121555,7 +121555,7 @@
     {
       "id": "129740",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-12-15 00:00:00",
+      "invoice_number": "12/15/2023",
       "invoice_date": "2023-12-15",
       "due_date": "2023-12-15",
       "currency": "USD",
@@ -121699,7 +121699,7 @@
     {
       "id": "132156",
       "vendor": "Oracle America Inc. (deleted)",
-      "invoice_number": "2023-12-26 00:00:00",
+      "invoice_number": "12/26/2023",
       "invoice_date": "2023-12-26",
       "due_date": "2023-12-26",
       "currency": "USD",
@@ -121789,7 +121789,7 @@
     {
       "id": "133037",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2023-12-29 00:00:00",
+      "invoice_number": "12/29/2023",
       "invoice_date": "2023-12-29",
       "due_date": "2023-12-29",
       "currency": "USD",
@@ -121969,7 +121969,7 @@
     {
       "id": "132539",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-01-02 00:00:00",
+      "invoice_number": "01/02/2024",
       "invoice_date": "2024-01-02",
       "due_date": "2024-01-02",
       "currency": "USD",
@@ -122077,7 +122077,7 @@
     {
       "id": "132797",
       "vendor": "Emmie Strommen c/o Calling all Horse Girls (deleted)",
-      "invoice_number": "",
+      "invoice_number": "N/A",
       "invoice_date": "2024-01-10",
       "due_date": "2024-01-10",
       "currency": "USD",
@@ -122347,7 +122347,7 @@
     {
       "id": "133252",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2023-12-16 00:00:00",
+      "invoice_number": "12/16/2023",
       "invoice_date": "2024-01-25",
       "due_date": "2024-01-25",
       "currency": "USD",
@@ -122509,7 +122509,7 @@
     {
       "id": "133929",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "",
+      "invoice_number": "NA",
       "invoice_date": "2024-02-09",
       "due_date": "2024-02-09",
       "currency": "USD",
@@ -122545,7 +122545,7 @@
     {
       "id": "133978",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-02-12 00:00:00",
+      "invoice_number": "02/12/2024",
       "invoice_date": "2024-02-12",
       "due_date": "2024-02-12",
       "currency": "USD",
@@ -122671,7 +122671,7 @@
     {
       "id": "133349",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2024-01-31 00:00:00",
+      "invoice_number": "01/31/2024",
       "invoice_date": "2024-01-31",
       "due_date": "2024-02-15",
       "currency": "USD",
@@ -122761,7 +122761,7 @@
     {
       "id": "136290",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-02-24 00:00:00",
+      "invoice_number": "02/24/2024",
       "invoice_date": "2024-02-24",
       "due_date": "2024-02-24",
       "currency": "USD",
@@ -122851,7 +122851,7 @@
     {
       "id": "134813",
       "vendor": "Back On Track BOT LLC",
-      "invoice_number": "2024-02-29 00:00:00",
+      "invoice_number": "02/29/2024",
       "invoice_date": "2024-02-29",
       "due_date": "2024-02-29",
       "currency": "USD",
@@ -122977,7 +122977,7 @@
     {
       "id": "134812",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-03-05 00:00:00",
+      "invoice_number": "03/05/2024",
       "invoice_date": "2024-03-05",
       "due_date": "2024-03-05",
       "currency": "USD",
@@ -123193,7 +123193,7 @@
     {
       "id": "134818",
       "vendor": "Horseware Products Ltd",
-      "invoice_number": "2024-02-15 00:00:00",
+      "invoice_number": "02/15/2024",
       "invoice_date": "2024-02-15",
       "due_date": "2024-03-16",
       "currency": "USD",
@@ -123247,7 +123247,7 @@
     {
       "id": "134470",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2024-02-29 00:00:00",
+      "invoice_number": "02/29/2024",
       "invoice_date": "2024-02-29",
       "due_date": "2024-03-18",
       "currency": "USD",
@@ -123535,7 +123535,7 @@
     {
       "id": "135696",
       "vendor": "Gunderson Dettmer (deleted)",
-      "invoice_number": "2024-03-29 00:00:00",
+      "invoice_number": "03/29/2024",
       "invoice_date": "2024-03-29",
       "due_date": "2024-03-29",
       "currency": "USD",
@@ -124003,7 +124003,7 @@
     {
       "id": "135974",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-04-09 00:00:00",
+      "invoice_number": "04/09/2024",
       "invoice_date": "2024-04-09",
       "due_date": "2024-04-09",
       "currency": "USD",
@@ -124309,7 +124309,7 @@
     {
       "id": "135973",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2024-03-29 00:00:00",
+      "invoice_number": "03/29/2024",
       "invoice_date": "2024-03-29",
       "due_date": "2024-04-18",
       "currency": "USD",
@@ -124471,7 +124471,7 @@
     {
       "id": "136226",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-03-30 00:00:00",
+      "invoice_number": "3/30/2024",
       "invoice_date": "2024-04-22",
       "due_date": "2024-04-22",
       "currency": "USD",
@@ -125317,7 +125317,7 @@
     {
       "id": "136672",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-05-13 00:00:00",
+      "invoice_number": "05/13/2024",
       "invoice_date": "2024-05-13",
       "due_date": "2024-05-13",
       "currency": "USD",
@@ -125425,7 +125425,7 @@
     {
       "id": "136673",
       "vendor": "Hachette Book Group (deleted)",
-      "invoice_number": "2024-05-13 00:00:00",
+      "invoice_number": "05/13/2024",
       "invoice_date": "2024-05-13",
       "due_date": "2024-05-18",
       "currency": "USD",
@@ -125983,7 +125983,7 @@
     {
       "id": "137116",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-06-07 00:00:00",
+      "invoice_number": "06/07/2024",
       "invoice_date": "2024-06-07",
       "due_date": "2024-06-07",
       "currency": "USD",
@@ -126307,7 +126307,7 @@
     {
       "id": "137304",
       "vendor": "Global International Products (DBA Kentucky)",
-      "invoice_number": "2024-06-13 00:00:00",
+      "invoice_number": "06/13/2024",
       "invoice_date": "2024-06-13",
       "due_date": "2024-06-13",
       "currency": "USD",
@@ -126415,7 +126415,7 @@
     {
       "id": "137043",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2024-05-31 00:00:00",
+      "invoice_number": "05/31/2024",
       "invoice_date": "2024-05-31",
       "due_date": "2024-06-15",
       "currency": "USD",
@@ -127171,7 +127171,7 @@
     {
       "id": "138086",
       "vendor": "Oak Tree Consulting (deleted)",
-      "invoice_number": "2024-07-01 00:00:00",
+      "invoice_number": "7/1/2024",
       "invoice_date": "2024-07-16",
       "due_date": "2024-07-01",
       "currency": "USD",
@@ -127387,7 +127387,7 @@
     {
       "id": "137974",
       "vendor": "First Insurance Funding (deleted)",
-      "invoice_number": "2024-07-08 00:00:00",
+      "invoice_number": "07/08/2024",
       "invoice_date": "2024-07-08",
       "due_date": "2024-07-08",
       "currency": "USD",
@@ -127477,7 +127477,7 @@
     {
       "id": "137975",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-07-09 00:00:00",
+      "invoice_number": "07/09/2024",
       "invoice_date": "2024-07-09",
       "due_date": "2024-07-09",
       "currency": "USD",
@@ -128053,7 +128053,7 @@
     {
       "id": "138381",
       "vendor": "Back On Track BOT LLC",
-      "invoice_number": "2024-07-31 00:00:00",
+      "invoice_number": "07/31/2024",
       "invoice_date": "2024-07-31",
       "due_date": "2024-07-31",
       "currency": "USD",
@@ -128287,7 +128287,7 @@
     {
       "id": "138379",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-08-07 00:00:00",
+      "invoice_number": "08/07/2024",
       "invoice_date": "2024-08-07",
       "due_date": "2024-08-07",
       "currency": "USD",
@@ -128539,7 +128539,7 @@
     {
       "id": "138238",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-07-09 00:00:00",
+      "invoice_number": "07/09/2024",
       "invoice_date": "2024-07-09",
       "due_date": "2024-08-08",
       "currency": "USD",
@@ -129025,7 +129025,7 @@
     {
       "id": "138500",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-08-27 00:00:00",
+      "invoice_number": "08/27/2024",
       "invoice_date": "2024-08-27",
       "due_date": "2024-08-27",
       "currency": "USD",
@@ -129097,7 +129097,7 @@
     {
       "id": "139080",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-08-29 00:00:00",
+      "invoice_number": "08/29/2024",
       "invoice_date": "2024-08-29",
       "due_date": "2024-08-29",
       "currency": "USD",
@@ -129403,7 +129403,7 @@
     {
       "id": "139106",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-09-04 00:00:00",
+      "invoice_number": "09/04/2024",
       "invoice_date": "2024-09-04",
       "due_date": "2024-09-04",
       "currency": "USD",
@@ -130249,7 +130249,7 @@
     {
       "id": "139548",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-09-10 00:00:00",
+      "invoice_number": "09/10/2024",
       "invoice_date": "2024-09-10",
       "due_date": "2024-09-10",
       "currency": "USD",
@@ -130519,7 +130519,7 @@
     {
       "id": "139599",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-08-16 00:00:00",
+      "invoice_number": "08/16/2024",
       "invoice_date": "2024-08-16",
       "due_date": "2024-09-15",
       "currency": "USD",
@@ -130735,7 +130735,7 @@
     {
       "id": "139546",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-09-19 00:00:00",
+      "invoice_number": "09/19/2024",
       "invoice_date": "2024-09-19",
       "due_date": "2024-09-19",
       "currency": "USD",
@@ -130861,7 +130861,7 @@
     {
       "id": "138505",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-08-20 00:00:00",
+      "invoice_number": "08/20/2024",
       "invoice_date": "2024-08-20",
       "due_date": "2024-09-20",
       "currency": "USD",
@@ -131221,7 +131221,7 @@
     {
       "id": "139085",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-08-27 00:00:00",
+      "invoice_number": "08/27/2024",
       "invoice_date": "2024-08-27",
       "due_date": "2024-09-26",
       "currency": "USD",
@@ -131653,7 +131653,7 @@
     {
       "id": "139689",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-10-02 00:00:00",
+      "invoice_number": "10/02/2024",
       "invoice_date": "2024-10-02",
       "due_date": "2024-10-02",
       "currency": "USD",
@@ -132373,7 +132373,7 @@
     {
       "id": "139557",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-10-06 00:00:00",
+      "invoice_number": "10/06/2024",
       "invoice_date": "2024-10-06",
       "due_date": "2024-10-06",
       "currency": "USD",
@@ -133597,7 +133597,7 @@
     {
       "id": "139922",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2024-10-26 00:00:00",
+      "invoice_number": "2024-10-26",
       "invoice_date": "2024-10-26",
       "due_date": "2024-10-26",
       "currency": "USD",
@@ -135037,7 +135037,7 @@
     {
       "id": "140329",
       "vendor": "MIDTOWN REALTY GROUP LLC",
-      "invoice_number": "2024-12-01 00:00:00",
+      "invoice_number": "12/01/2024",
       "invoice_date": "2024-11-20",
       "due_date": "2024-12-01",
       "currency": "USD",
@@ -135415,7 +135415,7 @@
     {
       "id": "140152",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-12-10 00:00:00",
+      "invoice_number": "12/10/2024",
       "invoice_date": "2024-12-10",
       "due_date": "2024-12-10",
       "currency": "USD",
@@ -136495,7 +136495,7 @@
     {
       "id": "140344",
       "vendor": "RJ Matthews Company",
-      "invoice_number": "2024-12-23 00:00:00",
+      "invoice_number": "12/23/2024",
       "invoice_date": "2024-12-23",
       "due_date": "2024-12-23",
       "currency": "USD",
@@ -139339,7 +139339,7 @@
     {
       "id": "143708",
       "vendor": "Veltri Sport LLC",
-      "invoice_number": "2025-02-01 00:00:00",
+      "invoice_number": "February 2025",
       "invoice_date": "2025-02-13",
       "due_date": "2025-02-13",
       "currency": "USD",
@@ -161713,7 +161713,7 @@
     {
       "id": "153104",
       "vendor": "FIRST Insurance Funding",
-      "invoice_number": "2025-11-26 00:00:00",
+      "invoice_number": "11/26/2025",
       "invoice_date": "2025-11-26",
       "due_date": "2025-12-18",
       "currency": "USD",
@@ -164593,7 +164593,7 @@
     {
       "id": "154283",
       "vendor": "FIRST Insurance Funding",
-      "invoice_number": "2026-01-30 00:00:00",
+      "invoice_number": "1/30/2026",
       "invoice_date": "2026-01-30",
       "due_date": "2026-02-18",
       "currency": "USD",
@@ -165511,7 +165511,7 @@
     {
       "id": "154284",
       "vendor": "FIRST Insurance Funding",
-      "invoice_number": "2026-02-27 00:00:00",
+      "invoice_number": "2/27/2026",
       "invoice_date": "2026-02-27",
       "due_date": "2026-03-18",
       "currency": "USD",
@@ -166141,7 +166141,7 @@
     {
       "id": "154285",
       "vendor": "FIRST Insurance Funding",
-      "invoice_number": "2026-03-31 00:00:00",
+      "invoice_number": "3/31/2026",
       "invoice_date": "2026-03-31",
       "due_date": "2026-04-18",
       "currency": "USD",
@@ -166267,7 +166267,7 @@
     {
       "id": "154297",
       "vendor": "FIRST Insurance Funding",
-      "invoice_number": "2026-04-30 00:00:00",
+      "invoice_number": "4/30/2026",
       "invoice_date": "2026-04-30",
       "due_date": "2026-04-30",
       "currency": "USD",
