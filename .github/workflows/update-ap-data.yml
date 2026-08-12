@@ -15,16 +15,18 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  GSHEET_ID: "1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c"
-  GSHEET_BILLS_SHEET: "QuickBooks Bills Import"
-  GSHEET_GENERAL_LEDGER_SHEET: "QuickBooks General Ledger Import"
-  GSHEET_GENERAL_LEDGER_GID: "186431676"
-  GSHEET_VENDOR_BALANCE_SHEET: "QuickBooks Vendor Balance Detail Import"
-  GSHEET_VENDOR_BALANCE_GID: "1046490113"
+  # Public/non-sensitive source identifiers. No QuickBooks API secret is needed.
+  GSHEET_ID: ${{ vars.GSHEET_ID || '1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c' }}
+  GSHEET_BILLS_SHEET: ${{ vars.GSHEET_BILLS_SHEET || 'QuickBooks Bill' }}
+  GSHEET_BILLS_GID: ${{ vars.GSHEET_BILLS_GID || '1297077839' }}
+  GSHEET_GENERAL_LEDGER_SHEET: ${{ vars.GSHEET_GENERAL_LEDGER_SHEET || 'QuickBooks General Ledger Import' }}
+  GSHEET_GENERAL_LEDGER_GID: ${{ vars.GSHEET_GENERAL_LEDGER_GID || '186431676' }}
+  GSHEET_VENDOR_BALANCE_SHEET: ${{ vars.GSHEET_VENDOR_BALANCE_SHEET || 'QuickBooks Vendor Balance Detail Import' }}
+  GSHEET_VENDOR_BALANCE_GID: ${{ vars.GSHEET_VENDOR_BALANCE_GID || '1046490113' }}
 
 jobs:
   update-data:
-    name: Update AP from QuickBooks Bills / Coefficient
+    name: Update AP from Coefficient / QuickBooks Bills
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -44,6 +46,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r scripts/requirements.txt
 
+      - name: Show configured sources
+        run: |
+          echo "Spreadsheet: $GSHEET_ID"
+          echo "Bills: $GSHEET_BILLS_SHEET (gid=$GSHEET_BILLS_GID)"
+          echo "General Ledger: $GSHEET_GENERAL_LEDGER_SHEET (gid=$GSHEET_GENERAL_LEDGER_GID)"
+          echo "Vendor Balance control: $GSHEET_VENDOR_BALANCE_SHEET (gid=$GSHEET_VENDOR_BALANCE_GID)"
+
       - name: Build AP dashboard data
         run: python scripts/transform.py
 
@@ -52,20 +61,27 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=Path('data/ap-data.json')
-          if not p.exists(): raise SystemExit('data/ap-data.json was not generated')
-          d=json.loads(p.read_text(encoding='utf-8'))
-          total=float(d.get('kpis',{}).get('total_ap',0) or 0)
-          bills=int(d.get('quality',{}).get('open_bills',0) or 0)
+          p = Path('data/ap-data.json')
+          if not p.exists():
+              raise SystemExit('data/ap-data.json was not generated')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          total = float(d.get('kpis', {}).get('total_ap', 0) or 0)
+          bills = int(d.get('quality', {}).get('open_bills', 0) or 0)
+          accounts = len(d.get('accounts_summary', []) or [])
+          vendors = len(d.get('top_vendors', []) or [])
           print(f"Total AP: ${total:,.2f}")
           print(f"Open bills: {bills}")
-          if bills == 0:
-              raise SystemExit('No open bills were parsed. Check the Coefficient QuickBooks Bills Import.')
+          print(f"Accounts with AP: {accounts}")
+          print(f"Top vendor rows: {vendors}")
+          if bills <= 0:
+              raise SystemExit('No open Bills were parsed from Coefficient QuickBooks Bill import.')
           if total <= 0:
-              raise SystemExit('Total AP is zero even though open bills exist. Check Bill.Balance in the Coefficient import.')
-          r=d.get('reconciliation',{})
-          if r.get('vendor_balance_available') and abs(float(r.get('variance',0) or 0)) > 0.02:
-              print('::warning title=Vendor Balance variance::Bills object and Vendor Balance Detail do not reconcile exactly. Review unapplied credits/report API behavior.')
+              raise SystemExit('Open Bills exist but Total AP is zero. Verify Balance is selected in the QuickBooks Bill import.')
+          if not d.get('invoices'):
+              raise SystemExit('Invoice detail is empty.')
+          r = d.get('reconciliation', {})
+          if r.get('vendor_balance_available') and abs(float(r.get('variance', 0) or 0)) > 0.02:
+              print('::warning title=Vendor Balance variance::Bill.Balance and Vendor Balance Detail differ. This may be caused by vendor credits/unapplied credits; Bill.Balance remains the AP source.')
           PY
 
       - name: Commit updated dashboard data
@@ -76,7 +92,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No AP data changes to commit."
           else
-            git commit -m "chore: update AP from QuickBooks Bills via Coefficient"
+            git commit -m "chore: refresh AP from QuickBooks Bills via Coefficient"
             git pull --rebase origin "${{ github.event.repository.default_branch }}"
             git push origin "HEAD:${{ github.event.repository.default_branch }}"
           fi
