@@ -1,16 +1,24 @@
-# Payables Dashboard — Coefficient / QuickBooks (FIX12)
+# Payables Dashboard — Coefficient Bills Object
 
-Source flow: **QuickBooks Online (real company) → Coefficient → Google Sheets → GitHub Actions → GitHub Pages**.
+## Required Coefficient import
+Create a new QuickBooks import in the existing **Payables 2026** spreadsheet:
 
-FIX12 handles the actual Coefficient `Vendor Balance Detail` layout where `Amount` and `Open Balance` headers can exist but their transaction cells are blank. The parser reconstructs each transaction's open amount from the change in QuickBooks' populated running `Balance` column, resetting the baseline for each vendor.
+1. Coefficient → Import → QuickBooks → **From Objects & Fields**.
+2. Object: **Bill**.
+3. Include at least these fields:
+   - Id
+   - DocNumber
+   - TxnDate
+   - DueDate
+   - TotalAmt
+   - Balance
+   - VendorRef (or Vendor / Vendor Name)
+4. No date filter for the first run (or include enough history for all currently open bills).
+5. Import name/tab: **QuickBooks Bills Import**.
+6. Schedule it to refresh daily before the GitHub Action.
 
-Configured source IDs:
-- Spreadsheet: `1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c`
-- Vendor Balance Detail GID: `1046490113`
-- General Ledger GID: `186431676`
+The existing tabs remain:
+- QuickBooks General Ledger Import (account/category enrichment)
+- QuickBooks Vendor Balance Detail Import (optional reconciliation only)
 
-Replace:
-- `scripts/transform.py`
-- `.github/workflows/update-ap-data.yml` (use the included `update-ap-data.yml` at repository path `.github/workflows/update-ap-data.yml`)
-
-No QuickBooks OAuth secrets are required for this Coefficient-based workflow.
+The Vendor Balance Detail report is deliberately NOT the main AP source because the current Coefficient/QuickBooks report response exposes Amount/Open Balance/Balance headers but returns blank values.

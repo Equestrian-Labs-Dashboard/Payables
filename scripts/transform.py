@@ -1,14 +1,20 @@
-"""Build data/ap-data.json from real QuickBooks data imported by Coefficient.
+"""Build data/ap-data.json from the REAL QuickBooks company via Coefficient.
 
-Required source:
-  1) Vendor Balance Detail report (authoritative AP/open balance + due dates)
-Optional/enrichment source:
-  2) General Ledger report (maps each bill/vendor to QuickBooks distribution accounts)
+Primary source (required): QuickBooks Bill OBJECT import in Google Sheets.
+  - This avoids the QuickBooks Reports API issue where Vendor Balance Detail can
+    expose Amount/Open Balance/Balance headers but return blank values.
+  - Required fields: Id, DocNumber, TxnDate, DueDate, TotalAmt, Balance,
+    VendorRef (or Vendor/Vendor Name).
 
-The spreadsheet can be public-read (Anyone with link -> Viewer). Coefficient is
-responsible for refreshing QuickBooks -> Google Sheets; this script is read-only.
+Enrichment source (recommended): General Ledger report import.
+  - Used only to map bills to distribution accounts/categories.
+  - A/P and bank control accounts are excluded.
+
+Optional control source: Vendor Balance Detail report import.
+  - If Coefficient actually returns numeric Open Balance/Balance values, it is
+    used as an independent reconciliation control. If its money fields are
+    blank, the dashboard still builds correctly from the Bill object import.
 """
-
 from __future__ import annotations
 
 import csv
@@ -27,680 +33,345 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "ap-data.json")
 VENDOR_MAP_PATH = os.path.join(DATA_DIR, "vendor-map.json")
 
 DEFAULT_GSHEET_ID = "1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c"
-DEFAULT_VENDOR_BALANCE_GID = "1046490113"
-DEFAULT_GENERAL_LEDGER_GID = "186431676"
+DEFAULT_BILLS_SHEET = "QuickBooks Bills Import"
+DEFAULT_GL_SHEET = "QuickBooks General Ledger Import"
+DEFAULT_GL_GID = "186431676"
 DEFAULT_VENDOR_BALANCE_SHEET = "QuickBooks Vendor Balance Detail Import"
-DEFAULT_GENERAL_LEDGER_SHEET = "QuickBooks General Ledger Import"
+DEFAULT_VENDOR_BALANCE_GID = "1046490113"
 
 CATEGORIES = [
-    "Inventory",
-    "Shipping & Fulfillment",
-    "Advertising",
-    "Sales & Marketing",
-    "G&A / OPEX",
-    "Unclassified",
+    "Inventory", "Shipping & Fulfillment", "Advertising",
+    "Sales & Marketing", "G&A / OPEX", "Unclassified",
 ]
 
 ACCOUNT_CATEGORY_RULES = [
-    # Shipping must be evaluated before generic COGS because QuickBooks accounts such as
-    # "Shipping, Freight & Delivery - COGS:Inbound Shipping" are shipping, not inventory.
-    ("Shipping & Fulfillment", [
-        "shipping", "freight", "fulfillment", "postage", "delivery", "warehouse",
-        "warehousing", "packaging", "inbound shipping", "outbound shipping",
-    ]),
-    ("Inventory", [
-        "inventory asset", "inventory", "cost of goods", "cogs", "merchandise",
-        "product cost", "purchases for resale", "purchases - resale",
-    ]),
-    ("Advertising", [
-        "advertising", "paid media", "google ads", "meta ads", "facebook ads",
-        "ad spend", "ppc", "media buying",
-    ]),
-    ("Sales & Marketing", [
-        "selling & marketing", "marketing", "creative", "content", "seo", "sponsorship",
-        "event", "brand", "sales commission", "influencer", "affiliate",
-    ]),
-    ("G&A / OPEX", [
-        "maintenance", "repair", "payroll", "wages", "salary", "staff", "contract labor",
-        "contractor", "consulting", "professional fee", "software", "subscription", "rent",
-        "office", "insurance", "legal", "accounting", "bank fee", "merchant fee", "utilities",
-        "gas and electric", "general & administrative", "g&a", "opex", "tax", "audit",
-        "intangible asset", "trademark",
-    ]),
+    ("Shipping & Fulfillment", ["shipping", "freight", "fulfillment", "postage", "delivery", "warehouse", "warehousing", "packaging", "inbound shipping", "outbound shipping"]),
+    ("Inventory", ["inventory asset", "inventory", "cost of goods", "cogs", "merchandise", "product cost", "purchases for resale", "purchases - resale"]),
+    ("Advertising", ["advertising", "paid media", "google ads", "meta ads", "facebook ads", "ad spend", "ppc", "media buying"]),
+    ("Sales & Marketing", ["selling & marketing", "marketing", "creative", "content", "seo", "sponsorship", "event", "brand", "sales commission", "influencer", "affiliate"]),
+    ("G&A / OPEX", ["maintenance", "repair", "payroll", "wages", "salary", "staff", "contract labor", "contractor", "consulting", "professional fee", "software", "subscription", "rent", "office", "insurance", "legal", "accounting", "bank fee", "merchant fee", "utilities", "gas and electric", "general & administrative", "g&a", "opex", "tax", "audit", "intangible asset", "trademark"]),
 ]
 
-EXCLUDED_GL_ACCOUNTS = [
-    "accounts payable", "a/p", "accounts receivable", "a/r", "bank account",
-    "checking", "savings", "undeposited funds", "credit card payable",
-]
+EXCLUDED_GL_ACCOUNTS = ["accounts payable", "a/p", "accounts receivable", "a/r", "bank account", "checking", "savings", "undeposited funds", "credit card payable"]
 
-HEADER_ALIASES = {
-    "date": ["date", "transaction date"],
+ALIASES = {
+    "id": ["id", "bill id", "transaction id"],
+    "doc_number": ["docnumber", "doc number", "num", "number", "invoice number", "invoice #", "bill number"],
+    "txn_date": ["txndate", "txn date", "transaction date", "date", "bill date"],
+    "due_date": ["duedate", "due date"],
+    "total_amt": ["totalamt", "total amt", "total amount", "amount", "original amount"],
+    "balance": ["balance", "open balance", "openbalance", "balance due", "remaining balance"],
+    "vendor": ["vendor", "vendor name", "supplier", "name", "vendorref.name", "vendor ref name", "vendorref"],
+    "ap_account": ["apaccountref.name", "ap account", "accounts payable account", "apaccountref"],
+    "currency": ["currencyref", "currency", "currencyref.value"],
+    "exchange_rate": ["exchangerate", "exchange rate"],
+    "memo": ["privatenote", "private note", "memo", "memo/description", "description"],
     "transaction_type": ["transaction type", "transactiontype", "type"],
-    "num": ["num", "number", "invoice no", "invoice #", "invoice number"],
-    "name": ["name", "vendor", "supplier"],
-    "due_date": ["due date", "duedate"],
-    "amount": ["amount", "original amount"],
-    "open_balance": ["open balance", "openbalance", "balance due"],
-    "debit": ["debit"],
-    "credit": ["credit"],
-    "balance": ["balance"],
-    "account": ["account", "account/sector", "distribution account"],
+    "debit": ["debit"], "credit": ["credit"], "account": ["account", "account/sector", "distribution account"],
 }
 
 
-def norm(value):
-    return re.sub(r"[^a-z0-9]+", "", str(value or "").strip().lower())
+def norm(v): return re.sub(r"[^a-z0-9]+", "", str(v or "").strip().lower())
+def text(v): return str(v or "").strip()
 
+def money(v):
+    if v is None: return 0.0
+    if isinstance(v, (int, float)): return float(v)
+    s = str(v).strip().replace("$", "").replace(",", "")
+    if not s or s in {"-", "—"}: return 0.0
+    if s.startswith("(") and s.endswith(")"): s = "-" + s[1:-1]
+    try: return float(s)
+    except ValueError: return 0.0
 
-def text(value):
-    return str(value or "").strip()
-
-
-def money(value):
-    if value is None:
-        return 0.0
-    if isinstance(value, (int, float)):
-        return float(value)
-    s = str(value).strip().replace("$", "").replace(",", "")
-    if not s or s in {"-", "—"}:
-        return 0.0
-    if s.startswith("(") and s.endswith(")"):
-        s = "-" + s[1:-1]
-    try:
-        return float(s)
-    except ValueError:
-        return 0.0
-
-
-def parse_date(value):
-    s = text(value)
-    if not s:
-        return ""
-    for fmt in ("%m/%d/%Y", "%m/%d/%y", "%Y-%m-%d", "%m-%d-%Y"):
-        try:
-            return datetime.strptime(s, fmt).date().isoformat()
-        except ValueError:
-            pass
+def parse_date(v):
+    s = text(v)
+    if not s: return ""
+    # ISO timestamps from object imports are accepted too.
+    if "T" in s:
+        s = s.split("T", 1)[0]
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%m-%d-%Y"):
+        try: return datetime.strptime(s, fmt).date().isoformat()
+        except ValueError: pass
     return ""
 
+def parse_ref_name(v):
+    """Extract a human name from QuickBooks Ref fields exported as JSON/text."""
+    s = text(v)
+    if not s: return ""
+    if s.startswith("{"):
+        try:
+            obj = json.loads(s)
+            for k in ("name", "Name", "value", "Value"):
+                if text(obj.get(k)): return text(obj.get(k))
+        except Exception:
+            pass
+    # Handles strings such as "123 - Vendor Name" / "Vendor Name (123)".
+    if " - " in s and s.split(" - ", 1)[0].strip().isdigit():
+        return s.split(" - ", 1)[1].strip()
+    return s
 
-def csv_rows(csv_text):
-    return [row for row in csv.reader(io.StringIO(csv_text))]
+def rows_from_csv(s): return list(csv.reader(io.StringIO(s)))
 
+def header_map(row):
+    n = [norm(x) for x in row]
+    out = {}
+    for key, aliases in ALIASES.items():
+        wanted = {norm(a) for a in aliases}
+        out[key] = [i for i, x in enumerate(n) if x in wanted]
+    return out
 
-def find_header(rows, required_groups):
-    """Return (index, header map) for the first matching row.
+def first_cell(row, h, key):
+    for i in h.get(key, []):
+        if i < len(row) and text(row[i]) != "": return row[i]
+    return ""
 
-    Important: Coefficient/QuickBooks can expose duplicate labels such as
-    ``Open balance`` and ``Open Balance``.  The old parser normalized both to
-    the same key and always selected the FIRST column, which can be an empty
-    compatibility field.  We therefore retain *all* matching indexes and let
-    row_value() select the first populated value.
-    """
-    for i, row in enumerate(rows[:100]):
-        norms = [norm(c) for c in row]
-        if all(any(norm(alias) in norms for alias in aliases) for aliases in required_groups):
-            mapping = {}
-            for key, aliases in HEADER_ALIASES.items():
-                wanted = {norm(a) for a in aliases}
-                indexes = [j for j, n in enumerate(norms) if n in wanted]
-                if indexes:
-                    mapping[key] = indexes
-            return i, mapping
-    return None, {}
-
-
-def get_cells(row, mapping, key):
-    idxs = mapping.get(key, [])
-    if isinstance(idxs, int):
-        idxs = [idxs]
-    return [row[i] if i < len(row) else "" for i in idxs]
-
-
-def get_cell(row, mapping, key):
-    """Return first non-empty duplicate field, preserving legacy behavior."""
-    vals = get_cells(row, mapping, key)
-    for value in vals:
-        if text(value) != "":
-            return value
-    return vals[0] if vals else ""
-
-
-def get_money_cell(row, mapping, *keys):
-    """Return a monetary value from duplicate/fallback columns.
-
-    Zero is considered a valid populated value. Empty cells are skipped.
-    """
-    for key in keys:
-        for value in get_cells(row, mapping, key):
-            raw = text(value)
-            if raw == "" or raw in {"-", "—"}:
-                continue
-            return money(value), key
-    return 0.0, ""
+def find_object_header(rows):
+    # Bill object import must have a date, a balance and vendor/ref.
+    for i, row in enumerate(rows[:80]):
+        h = header_map(row)
+        if h["balance"] and h["txn_date"] and (h["vendor"] or h["doc_number"]):
+            return i, h
+    return None, None
 
 def load_vendor_map():
     try:
-        with open(VENDOR_MAP_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {"rules": [], "default_category": "Unclassified"}
+        with open(VENDOR_MAP_PATH, "r", encoding="utf-8") as f: return json.load(f)
+    except Exception: return {"rules": [], "default_category": "Unclassified"}
 
-
-def classify_vendor(vendor, vendor_map):
+def classify_vendor(vendor, vm):
     v = text(vendor).lower()
-    for rule in vendor_map.get("rules", []):
-        keyword = text(rule.get("keyword")).lower()
-        if keyword and keyword in v:
-            cat = rule.get("category", "Unclassified")
-            return cat if cat in CATEGORIES else "Unclassified"
-    return vendor_map.get("default_category", "Unclassified")
+    for r in vm.get("rules", []):
+        kw = text(r.get("keyword")).lower()
+        if kw and kw in v:
+            c = r.get("category", "Unclassified")
+            return c if c in CATEGORIES else "Unclassified"
+    return vm.get("default_category", "Unclassified")
 
-
-def classify_account(account, vendor, vendor_map):
+def classify_account(account, vendor, vm):
     a = text(account).lower()
-    for category, keywords in ACCOUNT_CATEGORY_RULES:
-        if any(k in a for k in keywords):
-            return category
-    return classify_vendor(vendor, vendor_map)
+    for cat, kws in ACCOUNT_CATEGORY_RULES:
+        if any(k in a for k in kws): return cat
+    return classify_vendor(vendor, vm)
 
-
-def aging_bucket(due_date_iso, today=None):
-    today = today or date.today()
-    if not due_date_iso:
-        return "not_yet_due"
-    due = datetime.strptime(due_date_iso, "%Y-%m-%d").date()
+def aging_bucket(due_iso, today):
+    if not due_iso: return "not_yet_due"
+    due = datetime.strptime(due_iso, "%Y-%m-%d").date()
     days = (due - today).days
-    if days >= 0 and due.year == today.year and due.month == today.month:
-        return "due_this_month"
-    if days >= 0:
-        return "not_yet_due"
+    if days >= 0 and due.year == today.year and due.month == today.month: return "due_this_month"
+    if days >= 0: return "not_yet_due"
     return "overdue_lt_3m" if -days <= 90 else "overdue_gt_3m"
 
-
-def parse_vendor_balance(csv_text):
-    rows = csv_rows(csv_text)
-    header_i, h = find_header(
-        rows,
-        [HEADER_ALIASES["date"], HEADER_ALIASES["transaction_type"], HEADER_ALIASES["open_balance"]],
-    )
-    if header_i is None:
-        raise ValueError(
-            "Vendor Balance Detail header not found. Expected Date, Transaction Type and Open Balance columns."
-        )
-
-    header_row = rows[header_i]
-    print("Vendor Balance headers:", " | ".join(text(x) for x in header_row if text(x)))
-    if len(h.get("open_balance", [])) > 1:
-        print(f"Detected {len(h['open_balance'])} Open Balance columns; parser will use the first populated value per row.")
-
-    company = ""
-    for row in rows[:header_i]:
-        for cell in row:
-            c = text(cell)
-            if c and "vendor balance" not in c.lower() and c.lower() not in {"all dates", "accrual basis"}:
-                company = c
-                break
-        if company:
-            break
-
-    current_vendor = ""
-    previous_running_balance = 0.0
-    transactions = []
-    report_total = None
-    transaction_like_rows = 0
-    nonzero_rows = 0
-    value_sources = defaultdict(int)
-
-    for row in rows[header_i + 1:]:
-        first = text(row[0]) if row else ""
-        dt_raw = get_cell(row, h, "date")
-        tx_type = text(get_cell(row, h, "transaction_type"))
-
-        # QuickBooks grand total can be either TOTAL or a row whose first populated
-        # cell is TOTAL, depending on the Coefficient export layout.
-        populated = [text(c) for c in row if text(c)]
-        row_label = populated[0] if populated else ""
-        if row_label.upper() == "TOTAL":
-            report_total, source = get_money_cell(row, h, "open_balance", "amount")
-            if not source:
-                report_total, source = get_money_cell(row, h, "balance")
-            value_sources[f"report_total:{source or 'none'}"] += 1
-            continue
-
-        # Vendor section row such as "Animal Health International". In the exported
-        # report the vendor heading occupies the SAME first column whose header is
-        # "Date", so checking only for an empty raw Date is wrong. Treat a row as a
-        # vendor heading when it has no transaction type and the first cell is not a
-        # parseable date. QuickBooks' running Balance restarts for each vendor.
-        parsed_dt = parse_date(dt_raw)
-        if first and not tx_type and not parsed_dt and not first.lower().startswith("total for "):
-            current_vendor = first
-            previous_running_balance = 0.0
-            continue
-
-        if not parsed_dt or not tx_type:
-            continue
-
-        transaction_like_rows += 1
-        vendor = text(get_cell(row, h, "name")) or current_vendor
-
-        # Coefficient's Vendor Balance Detail import can expose Amount/Open Balance
-        # headers while leaving those cells blank. The QuickBooks running Balance
-        # column is still populated. In that layout the transaction's open amount is
-        # exactly the change in the running vendor balance. Example: 543.90 ->
-        # 1,621.63 means the second bill contributes 1,077.73. This also preserves
-        # Vendor Credits because a credit reduces the running balance.
-        open_balance, source = get_money_cell(row, h, "open_balance", "amount")
-
-        running_raw = get_cell(row, h, "balance")
-        running_present = text(running_raw) not in {"", "-", "—"}
-        running_balance = money(running_raw) if running_present else None
-
-        if not source and running_present:
-            open_balance = round(running_balance - previous_running_balance, 2)
-            source = "balance_delta"
-
-        # Keep the baseline aligned even when Amount/Open Balance happens to be
-        # populated on some rows and blank on others.
-        if running_present:
-            previous_running_balance = running_balance
-
-        value_sources[source or "none"] += 1
-        if abs(open_balance) < 0.005:
-            continue
-        nonzero_rows += 1
-
-        original_amount, original_source = get_money_cell(row, h, "amount")
-        if not original_source:
-            # For a current Vendor Balance Detail report, delta is the best available
-            # amount when Coefficient suppresses Amount. This is the remaining amount,
-            # not necessarily the historical original invoice amount for partial pays.
-            original_amount = open_balance
-
-        transactions.append({
-            "vendor": vendor or "Unknown vendor",
-            "transaction_type": tx_type,
-            "invoice_number": text(get_cell(row, h, "num")),
-            "invoice_date": parsed_dt,
-            "due_date": parse_date(get_cell(row, h, "due_date")),
-            "original_amount": round(original_amount, 2),
-            "open_balance": round(open_balance, 2),
+def parse_bills_object(csv_text):
+    rows = rows_from_csv(csv_text)
+    hi, h = find_object_header(rows)
+    if hi is None:
+        raise ValueError("QuickBooks Bills object import header not found. Required fields include TxnDate/Date, Balance, and Vendor/VendorRef.")
+    print("Bills object headers:", " | ".join(text(x) for x in rows[hi] if text(x)))
+    bills = []
+    seen = set()
+    for row in rows[hi+1:]:
+        txn = parse_date(first_cell(row, h, "txn_date"))
+        if not txn: continue
+        bal_raw = first_cell(row, h, "balance")
+        # Balance=0 is valid (paid bill), but blank means unusable row.
+        if text(bal_raw) == "": continue
+        bal = money(bal_raw)
+        total = money(first_cell(row, h, "total_amt"))
+        vendor = parse_ref_name(first_cell(row, h, "vendor")) or "Unknown vendor"
+        doc = text(first_cell(row, h, "doc_number"))
+        bill_id = text(first_cell(row, h, "id"))
+        key = bill_id or (norm(vendor), norm(doc), txn, round(total, 2), round(bal, 2))
+        if key in seen: continue
+        seen.add(key)
+        bills.append({
+            "id": bill_id, "vendor": vendor, "transaction_type": "Bill",
+            "invoice_number": doc, "invoice_date": txn,
+            "due_date": parse_date(first_cell(row, h, "due_date")),
+            "original_amount": round(total if total else bal, 2),
+            "open_balance": round(bal, 2),
+            "memo": text(first_cell(row, h, "memo")),
+            "ap_account": parse_ref_name(first_cell(row, h, "ap_account")),
         })
+    if not bills:
+        raise ValueError("QuickBooks Bills object import returned no usable Bill rows with a Balance field.")
+    open_count = sum(1 for b in bills if b["open_balance"] > 0.005)
+    print(f"Bills object rows parsed: {len(bills)}; open bills: {open_count}; open AP: ${sum(max(0,b['open_balance']) for b in bills):,.2f}")
+    return bills
 
-    print(f"Vendor Balance transaction rows detected: {transaction_like_rows}; non-zero open rows parsed: {nonzero_rows}")
-    print("Vendor Balance value sources:", dict(value_sources))
+def find_report_header(rows, required):
+    for i,row in enumerate(rows[:100]):
+        h=header_map(row)
+        if all(h[k] for k in required): return i,h
+    return None,None
 
-    # Never publish a false $0 / Reconciled dashboard when the report visibly
-    # contains transactions but Coefficient returned blank money fields.
-    if transaction_like_rows > 0 and nonzero_rows == 0:
-        raise ValueError(
-            "Vendor Balance Detail contains transaction rows but Amount/Open Balance and the running Balance are blank or zero. "
-            "Refresh the Coefficient Vendor Balance Detail import and verify that its Balance column is populated. "
-            "The workflow is stopping instead of publishing an incorrect $0 dashboard."
-        )
+def parse_vendor_balance_optional(csv_text):
+    """Optional independent control. Never blocks dashboard when report money is blank."""
+    if not csv_text.strip(): return {"available": False, "total": None, "note": "Vendor Balance Detail not loaded."}
+    rows=rows_from_csv(csv_text); hi,h=find_report_header(rows,["txn_date","transaction_type"])
+    if hi is None: return {"available": False, "total": None, "note": "Vendor Balance Detail header not recognized."}
+    total=None; numeric=[]
+    for row in rows[hi+1:]:
+        populated=[text(c) for c in row if text(c)]
+        if populated and populated[0].upper()=="TOTAL":
+            # Prefer Open Balance; then Balance/Amount.
+            for key in ("balance","total_amt"):
+                raw=first_cell(row,h,key)
+                if text(raw): total=money(raw); break
+            continue
+        if not parse_date(first_cell(row,h,"txn_date")): continue
+        # Some Coefficient report imports expose blank numeric fields; detect but don't fail.
+        for key in ("balance","total_amt"):
+            raw=first_cell(row,h,key)
+            if text(raw): numeric.append(money(raw)); break
+    if total is None and numeric: total=round(sum(numeric),2)
+    if total is None or (abs(total)<0.005 and not any(abs(x)>0.005 for x in numeric)):
+        return {"available":False,"total":None,"note":"Vendor Balance Detail money fields are blank in the Coefficient/QuickBooks report API; Bills object is used as the authoritative AP source."}
+    return {"available":True,"total":round(total,2),"note":"Vendor Balance Detail numeric control loaded."}
 
-    if report_total is None or (abs(report_total) < 0.005 and transactions):
-        report_total = round(sum(t["open_balance"] for t in transactions), 2)
-        print(f"Vendor Balance TOTAL was blank; calculated control total from open rows: ${report_total:,.2f}")
+def gl_account_is_distribution(a):
+    s=text(a).lower(); return bool(s) and not any(x in s for x in EXCLUDED_GL_ACCOUNTS)
 
-    return company, transactions, round(report_total, 2)
-
-def gl_account_is_distribution(account):
-    a = text(account).lower()
-    if not a:
-        return False
-    return not any(token in a for token in EXCLUDED_GL_ACCOUNTS)
-
-
-def add_weight(bucket, key, account, weight):
-    if not key or not account or weight <= 0:
-        return
-    bucket[key][account] += weight
-
+def addw(bucket,key,account,w):
+    if key and account and w>0: bucket[key][account]+=w
 
 def parse_general_ledger(csv_text):
-    rows = csv_rows(csv_text)
-    header_i, h = find_header(
-        rows,
-        [HEADER_ALIASES["date"], HEADER_ALIASES["transaction_type"], HEADER_ALIASES["name"], HEADER_ALIASES["account"]],
-    )
-    if header_i is None:
-        raise ValueError(
-            "General Ledger header not found. Expected Date, Transaction Type, Name and Account columns."
-        )
+    rows=rows_from_csv(csv_text); hi,h=find_report_header(rows,["txn_date","transaction_type","vendor","account"])
+    if hi is None: raise ValueError("General Ledger header not found. Expected Date, Transaction Type, Name/Vendor and Account.")
+    exact=defaultdict(lambda:defaultdict(float)); invoice=defaultdict(lambda:defaultdict(float)); vendor=defaultdict(lambda:defaultdict(float)); usable=0
+    for row in rows[hi+1:]:
+        t=text(first_cell(row,h,"transaction_type")); v=text(first_cell(row,h,"vendor")); a=text(first_cell(row,h,"account")); n=text(first_cell(row,h,"doc_number"))
+        # Only original supplier documents should define classification; payments/JEs pollute vendor history.
+        if t.lower() not in {"bill","vendor credit"} or not v or not gl_account_is_distribution(a): continue
+        vals=[]
+        for k in ("debit","credit","total_amt"):
+            raw=first_cell(row,h,k)
+            if text(raw): vals.append(abs(money(raw)))
+        w=max(vals or [0])
+        if w<=0: continue
+        vk,nk,tk=norm(v),norm(n),norm(t)
+        addw(exact,(vk,nk,tk),a,w)
+        if nk: addw(invoice,(vk,nk),a,w)
+        addw(vendor,vk,a,w); usable+=1
+    print(f"General Ledger usable Bill/Vendor Credit distribution rows: {usable}")
+    return {"exact":exact,"invoice":invoice,"vendor":vendor,"usable_rows":usable}
 
-    exact = defaultdict(lambda: defaultdict(float))
-    invoice = defaultdict(lambda: defaultdict(float))
-    vendor = defaultdict(lambda: defaultdict(float))
-    usable_rows = 0
+def choose_weights(tx,gl):
+    vk,nk,tk=norm(tx["vendor"]),norm(tx["invoice_number"]),norm(tx["transaction_type"])
+    for weights,source in [
+        (gl.get("exact",{}).get((vk,nk,tk)),"exact invoice + type"),
+        (gl.get("invoice",{}).get((vk,nk)),"exact invoice"),
+        (gl.get("vendor",{}).get(vk),"vendor history"),
+    ]:
+        if weights: return dict(weights),source
+    return {},"unmapped"
 
-    for row in rows[header_i + 1:]:
-        tx_type = text(get_cell(row, h, "transaction_type"))
-        vendor_name = text(get_cell(row, h, "name"))
-        account = text(get_cell(row, h, "account"))
-        num = text(get_cell(row, h, "num"))
-        if not tx_type or not vendor_name or not gl_account_is_distribution(account):
-            continue
-        # The AP dashboard only needs supplier-side postings.
-        if tx_type.lower() not in {"bill", "vendor credit", "journal entry", "bill payment (check)", "bill payment"}:
-            continue
-
-        debit = abs(money(get_cell(row, h, "debit")))
-        credit = abs(money(get_cell(row, h, "credit")))
-        amt = abs(money(get_cell(row, h, "amount")))
-        weight = max(debit, credit, amt)
-        if weight <= 0:
-            continue
-
-        vk = norm(vendor_name)
-        nk = norm(num)
-        tk = norm(tx_type)
-        add_weight(exact, (vk, nk, tk), account, weight)
-        if nk:
-            add_weight(invoice, (vk, nk), account, weight)
-        add_weight(vendor, vk, account, weight)
-        usable_rows += 1
-
-    return {"exact": exact, "invoice": invoice, "vendor": vendor, "usable_rows": usable_rows}
-
-
-def choose_account_weights(tx, gl):
-    vk = norm(tx["vendor"])
-    nk = norm(tx["invoice_number"])
-    tk = norm(tx["transaction_type"])
-    candidates = [
-        (gl.get("exact", {}).get((vk, nk, tk)), "exact invoice + type"),
-        (gl.get("invoice", {}).get((vk, nk)), "exact invoice"),
-        (gl.get("vendor", {}).get(vk), "vendor history"),
-    ]
-    for weights, source in candidates:
-        if weights:
-            return dict(weights), source
-    return {}, "unmapped"
-
-
-def allocate_balance(tx, gl, vendor_map):
-    weights, source = choose_account_weights(tx, gl)
-    balance = float(tx["open_balance"] or 0)
+def allocate(tx,gl,vm):
+    weights,src=choose_weights(tx,gl); bal=max(0.0,float(tx["open_balance"] or 0))
     if not weights:
-        category = classify_vendor(tx["vendor"], vendor_map)
-        return [{
-            "account": "Unmapped - review in QuickBooks",
-            "category": category,
-            "open_balance": round(balance, 2),
-            "mapping_source": source,
-        }]
+        cat=classify_vendor(tx["vendor"],vm)
+        return [{"account":"Unmapped - review in QuickBooks","category":cat,"open_balance":round(bal,2),"mapping_source":src}]
+    total=sum(weights.values()) or 1; out=[]; running=0
+    items=sorted(weights.items(),key=lambda x:x[1],reverse=True)
+    for i,(a,w) in enumerate(items):
+        amt=round(bal-running,2) if i==len(items)-1 else round(bal*w/total,2)
+        if i<len(items)-1: running+=amt
+        out.append({"account":a,"category":classify_account(a,tx["vendor"],vm),"open_balance":amt,"mapping_source":src})
+    return out
 
-    total_weight = sum(weights.values()) or 1.0
-    items = sorted(weights.items(), key=lambda x: x[1], reverse=True)
-    allocations = []
-    running = 0.0
-    for i, (account, weight) in enumerate(items):
-        if i == len(items) - 1:
-            amount = round(balance - running, 2)
-        else:
-            amount = round(balance * weight / total_weight, 2)
-            running += amount
-        allocations.append({
-            "account": account,
-            "category": classify_account(account, tx["vendor"], vendor_map),
-            "open_balance": amount,
-            "mapping_source": source,
-        })
-    return allocations
-
-
-def blank_rollup(key, name):
-    return {
-        key: name,
-        "total": 0.0,
-        "not_yet_due": 0.0,
-        "due_this_month": 0.0,
-        "overdue_lt_3m": 0.0,
-        "overdue_gt_3m": 0.0,
-        "bill_count": 0,
-    }
-
+def blank_rollup(key,name):
+    return {key:name,"total":0.0,"not_yet_due":0.0,"due_this_month":0.0,"overdue_lt_3m":0.0,"overdue_gt_3m":0.0,"bill_count":0}
 
 def load_previous_trend():
     try:
-        with open(OUTPUT_PATH, "r", encoding="utf-8") as f:
-            old = json.load(f)
-        if old.get("source") != "coefficient_google_sheets_quickbooks":
-            return []
-        return old.get("monthly_trend", []) or []
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+        old=json.load(open(OUTPUT_PATH,encoding="utf-8")); return old.get("monthly_trend",[]) or []
+    except Exception:return []
+def update_trend(prev,total):
+    m=date.today().strftime("%Y-%m"); by={str(x.get("month")):x for x in prev if x.get("month")}; by[m]={"month":m,"total_ap":round(total,2)}; return [by[k] for k in sorted(by)[-6:]]
 
-
-def update_trend(previous, total_ap):
-    month = date.today().strftime("%Y-%m")
-    by_month = {str(r.get("month")): r for r in previous if r.get("month")}
-    by_month[month] = {"month": month, "total_ap": round(total_ap, 2)}
-    return [by_month[k] for k in sorted(by_month)[-6:]]
-
-
-def build_dashboard(vendor_csv, gl_csv=""):
-    vendor_map = load_vendor_map()
-    company, txs, report_total = parse_vendor_balance(vendor_csv)
-
-    if gl_csv.strip():
-        try:
-            gl = parse_general_ledger(gl_csv)
-            gl_note = f"General Ledger loaded ({gl['usable_rows']} usable distribution rows)."
-        except ValueError as exc:
-            print(f"::warning title=General Ledger parse warning::{exc}")
-            gl = {"exact": {}, "invoice": {}, "vendor": {}, "usable_rows": 0}
-            gl_note = "General Ledger unavailable; vendor mapping fallback used."
-    else:
-        gl = {"exact": {}, "invoice": {}, "vendor": {}, "usable_rows": 0}
-        gl_note = "General Ledger unavailable; vendor mapping fallback used."
-
-    today = date.today()
-    account_rollups = {}
-    category_rollups = {c: blank_rollup("name", c) for c in CATEGORIES}
-    vendor_totals = defaultdict(float)
-    invoices = []
-
-    gross_open_bills = 0.0
-    non_bill_adjustments = 0.0
-    vendor_credit_balance = 0.0
-    aging = defaultdict(float)
-    missing_due = 0
-    unmapped_count = 0
-    unclassified_balance = 0.0
-
-    for tx in txs:
-        is_bill = tx["transaction_type"].strip().lower() == "bill"
-        bal = float(tx["open_balance"] or 0)
-        if is_bill and bal > 0:
-            gross_open_bills += bal
-            bucket = aging_bucket(tx["due_date"], today)
-            aging[bucket] += bal
-            if not tx["due_date"]:
-                missing_due += 1
-        else:
-            bucket = None
-            non_bill_adjustments += bal
-            if "vendor credit" in tx["transaction_type"].lower() and bal < 0:
-                vendor_credit_balance += bal
-
-        allocations = allocate_balance(tx, gl, vendor_map)
-        if allocations and allocations[0]["mapping_source"] == "unmapped":
-            unmapped_count += 1
-
-        for alloc in allocations:
-            account = alloc["account"]
-            category = alloc["category"] if alloc["category"] in CATEGORIES else "Unclassified"
-            amount = float(alloc["open_balance"] or 0)
-            if account not in account_rollups:
-                account_rollups[account] = blank_rollup("account", account)
-                account_rollups[account]["category"] = category
-            ar = account_rollups[account]
-            ar["total"] += amount
-            cr = category_rollups[category]
-            cr["total"] += amount
-            if is_bill:
-                ar["bill_count"] += 1
-                cr["bill_count"] += 1
-                if bucket:
-                    ar[bucket] += amount
-                    cr[bucket] += amount
-            if category == "Unclassified":
-                unclassified_balance += amount
-
-        vendor_totals[tx["vendor"]] += bal
-
-        due = tx["due_date"]
-        days_overdue = 0
-        if due and is_bill and bal > 0:
-            days_overdue = max(0, (today - datetime.strptime(due, "%Y-%m-%d").date()).days)
-        if not is_bill:
-            status = "Credit" if bal < 0 else "Adjustment"
-        elif bal <= 0:
-            status = "Paid"
-        else:
-            b = aging_bucket(due, today)
-            status = {
-                "not_yet_due": "Not due",
-                "due_this_month": "Due this month",
-                "overdue_lt_3m": "Overdue",
-                "overdue_gt_3m": "Overdue",
-            }[b]
-
-        primary = max(allocations, key=lambda x: abs(x["open_balance"])) if allocations else {
-            "account": "Unmapped - review in QuickBooks", "category": "Unclassified", "mapping_source": "unmapped"
-        }
-        original = float(tx["original_amount"] or 0)
-        paid = max(0.0, original - bal) if is_bill and bal >= 0 else 0.0
+def build_dashboard(bills_csv, gl_csv, vendor_balance_csv=""):
+    vm=load_vendor_map(); bills=parse_bills_object(bills_csv)
+    try: gl=parse_general_ledger(gl_csv) if gl_csv.strip() else {"exact":{},"invoice":{},"vendor":{},"usable_rows":0}
+    except ValueError as e:
+        print(f"::warning title=General Ledger parse warning::{e}"); gl={"exact":{},"invoice":{},"vendor":{},"usable_rows":0}
+    control=parse_vendor_balance_optional(vendor_balance_csv)
+    today=date.today(); accounts={}; cats={c:blank_rollup("name",c) for c in CATEGORIES}; vendors=defaultdict(float); invoices=[]; aging=defaultdict(float)
+    gross=0.0; missing_due=0; unmapped=0; unclassified=0.0
+    for tx in bills:
+        bal=max(0.0,float(tx["open_balance"] or 0))
+        paid=max(0.0,float(tx["original_amount"] or 0)-bal)
+        bucket=aging_bucket(tx["due_date"],today) if bal>0 else ""
+        if bal>0:
+            gross+=bal; aging[bucket]+=bal; vendors[tx["vendor"]]+=bal
+            if not tx["due_date"]: missing_due+=1
+        allocs=allocate(tx,gl,vm) if bal>0 else []
+        if bal>0 and allocs and allocs[0]["mapping_source"]=="unmapped": unmapped+=1
+        labels=[]; cat_amounts=defaultdict(float)
+        for a in allocs:
+            labels.append(a["account"]); cat_amounts[a["category"]]+=a["open_balance"]
+            r=accounts.setdefault(a["account"],blank_rollup("account",a["account"])); r["category"]=a["category"]; r["total"]+=a["open_balance"]; r[bucket]+=a["open_balance"] if bucket else 0
+        primary_cat=max(cat_amounts,key=cat_amounts.get) if cat_amounts else classify_vendor(tx["vendor"],vm)
+        if bal>0:
+            cats[primary_cat]["total"]+=bal; cats[primary_cat][bucket]+=bal; cats[primary_cat]["bill_count"]+=1
+            if primary_cat=="Unclassified": unclassified+=bal
+            for a in set(labels): accounts[a]["bill_count"]+=1
+        days_overdue=0
+        if tx["due_date"]:
+            due=datetime.strptime(tx["due_date"],"%Y-%m-%d").date(); days_overdue=max(0,(today-due).days)
+        status="Paid" if bal<=0.005 else ("Overdue" if days_overdue>0 else ("Due this month" if bucket=="due_this_month" else "Not due"))
         invoices.append({
-            "vendor": tx["vendor"],
-            "transaction_type": tx["transaction_type"],
-            "invoice_number": tx["invoice_number"],
-            "invoice_date": tx["invoice_date"],
-            "due_date": tx["due_date"],
-            "primary_account": primary["account"],
-            "account_labels": [a["account"] for a in allocations],
-            "account_mapping_source": primary["mapping_source"],
-            "category": primary["category"],
-            "original_amount": round(original, 2),
-            "amount_paid": round(paid, 2),
-            "remaining_balance": round(bal, 2),
-            "days_overdue": days_overdue,
-            "status": status,
-            "duplicate_candidate": False,
+            "vendor":tx["vendor"],"invoice_number":tx["invoice_number"],"invoice_date":tx["invoice_date"],"due_date":tx["due_date"],
+            "original_amount":round(tx["original_amount"],2),"amount_paid":round(paid,2),"remaining_balance":round(bal,2),"days_overdue":days_overdue,"status":status,
+            "primary_account":labels[0] if labels else "Unmapped - review in QuickBooks","account_labels":labels or ["Unmapped - review in QuickBooks"],"category":primary_cat,
         })
-
-    calculated_net = round(sum(t["open_balance"] for t in txs), 2)
-    variance = round(calculated_net - report_total, 2)
-
-    accounts_summary = []
-    for r in account_rollups.values():
-        for k in ["total", "not_yet_due", "due_this_month", "overdue_lt_3m", "overdue_gt_3m"]:
-            r[k] = round(r[k], 2)
-        accounts_summary.append(r)
-    accounts_summary.sort(key=lambda r: abs(r["total"]), reverse=True)
-
-    categories = []
-    for name in CATEGORIES:
-        r = category_rollups[name]
-        for k in ["total", "not_yet_due", "due_this_month", "overdue_lt_3m", "overdue_gt_3m"]:
-            r[k] = round(r[k], 2)
-        categories.append(r)
-
-    top_vendors = [
-        {"vendor": v, "balance": round(b, 2)}
-        for v, b in sorted(vendor_totals.items(), key=lambda x: x[1], reverse=True)
-        if b > 0.005
-    ][:10]
-
-    net_total = calculated_net
-    kpis = {
-        "total_ap": round(net_total, 2),
-        "gross_open_bills": round(gross_open_bills, 2),
-        "credits_adjustments": round(non_bill_adjustments, 2),
-        "aging_total": round(gross_open_bills, 2),
-        "not_yet_due": round(aging["not_yet_due"], 2),
-        "due_this_month": round(aging["due_this_month"], 2),
-        "overdue_lt_3m": round(aging["overdue_lt_3m"], 2),
-        "overdue_gt_3m": round(aging["overdue_gt_3m"], 2),
+    total=round(gross,2)
+    # Bill.Balance is authoritative. Vendor Balance is only an optional cross-check.
+    vendor_total=control["total"] if control["available"] else None
+    variance=round(total-vendor_total,2) if vendor_total is not None else None
+    for d in list(accounts.values())+list(cats.values()):
+        for k in ("total","not_yet_due","due_this_month","overdue_lt_3m","overdue_gt_3m"): d[k]=round(d[k],2)
+    account_summary=sorted([r for r in accounts.values() if r["total"]>0.005],key=lambda x:x["total"],reverse=True)
+    categories=sorted([r for r in cats.values()],key=lambda x:x["total"],reverse=True)
+    top_vendors=[{"vendor":v,"balance":round(b,2)} for v,b in sorted(vendors.items(),key=lambda x:x[1],reverse=True)[:12]]
+    return {
+        "source":"coefficient_google_sheets_quickbooks_bills_object",
+        "source_note":"Source: QuickBooks Online (real company) → Coefficient Bills object + General Ledger → Google Sheets",
+        "company":"Equestrian Labs, Inc. (dba Corro)","generated_at":datetime.now(timezone.utc).isoformat(),
+        "kpis":{"total_ap":total,"gross_open_bills":total,"credits_adjustments":0.0,"aging_total":total,"not_yet_due":round(aging["not_yet_due"],2),"due_this_month":round(aging["due_this_month"],2),"overdue_lt_3m":round(aging["overdue_lt_3m"],2),"overdue_gt_3m":round(aging["overdue_gt_3m"],2)},
+        "reconciliation":{"calculated_net_ap":total,"vendor_balance_available":control["available"],"vendor_balance_total":vendor_total,"variance":variance,"reconciled":bool(control["available"] and abs(variance or 0)<=0.02),"note":control["note"]},
+        "accounts_summary":account_summary,"categories":categories,"top_vendors":top_vendors,
+        "monthly_trend":update_trend(load_previous_trend(),total),"invoices":sorted(invoices,key=lambda x:(x["remaining_balance"]<=0,-x["days_overdue"],-x["remaining_balance"])),
+        "quality":{"open_bills":sum(1 for x in invoices if x["remaining_balance"]>0.005),"unmapped_bills":unmapped,"unclassified_balance":round(unclassified,2),"missing_due_date":missing_due,"general_ledger_usable_rows":gl.get("usable_rows",0)},
     }
-
-    result = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "currency": "USD",
-        "source": "coefficient_google_sheets_quickbooks",
-        "source_note": "Source: QuickBooks Online → Coefficient → Google Sheets",
-        "company": company or "Equestrian Labs, Inc. (dba Corro)",
-        "environment": "production-data-via-coefficient",
-        "kpis": kpis,
-        "reconciliation": {
-            "calculated_net_ap": calculated_net,
-            "vendor_balance_total": report_total,
-            "vendor_balance_available": True,
-            "variance": variance,
-            "reconciled": abs(variance) <= 0.02,
-            "gross_open_bills": round(gross_open_bills, 2),
-            "credits_adjustments": round(non_bill_adjustments, 2),
-            "note": f"{gl_note} Vendor Balance TOTAL is the control total.",
-        },
-        "accounts_summary": accounts_summary,
-        "categories": categories,
-        "top_vendors": top_vendors,
-        "monthly_trend": update_trend(load_previous_trend(), net_total),
-        "invoices": sorted(invoices, key=lambda x: (x["remaining_balance"] > 0, x["days_overdue"], abs(x["remaining_balance"])), reverse=True),
-        "data_quality": {
-            "open_bill_count": sum(1 for t in txs if t["transaction_type"].lower() == "bill" and t["open_balance"] > 0),
-            "missing_account_count": unmapped_count,
-            "unclassified_count": sum(1 for x in invoices if x["category"] == "Unclassified"),
-            "unclassified_balance": round(unclassified_balance, 2),
-            "missing_due_date_count": missing_due,
-            "available_vendor_credits": round(abs(vendor_credit_balance), 2),
-            "other_adjustments": round(non_bill_adjustments - vendor_credit_balance, 2),
-            "gl_usable_rows": int(gl.get("usable_rows", 0)),
-            "vendor_balance_transaction_count": len(txs),
-        },
-    }
-    return result
-
 
 def main():
-    # The spreadsheet ID and GIDs are non-secret identifiers. Defaults point to the
-    # real Coefficient imports currently used by this project. GitHub variables may
-    # override them later without changing code.
-    sheet_id = (os.getenv("GSHEET_ID") or DEFAULT_GSHEET_ID).strip()
-    vendor_sheet = (os.getenv("GSHEET_VENDOR_BALANCE_SHEET") or DEFAULT_VENDOR_BALANCE_SHEET).strip()
-    vendor_gid = (os.getenv("GSHEET_VENDOR_BALANCE_GID") or DEFAULT_VENDOR_BALANCE_GID).strip()
-    gl_sheet = (os.getenv("GSHEET_GENERAL_LEDGER_SHEET") or DEFAULT_GENERAL_LEDGER_SHEET).strip()
-    gl_gid = (os.getenv("GSHEET_GENERAL_LEDGER_GID") or DEFAULT_GENERAL_LEDGER_GID).strip()
-
-    client = GoogleSheetsClient(sheet_id)
-    print(f"Reading Vendor Balance from Google Sheet: {vendor_sheet or vendor_gid}")
-    vendor_csv = client.fetch_csv(sheet_name=vendor_sheet, gid=vendor_gid)
-
-    gl_csv = ""
+    sid=os.getenv("GSHEET_ID",DEFAULT_GSHEET_ID).strip() or DEFAULT_GSHEET_ID
+    bills_sheet=os.getenv("GSHEET_BILLS_SHEET",DEFAULT_BILLS_SHEET).strip() or DEFAULT_BILLS_SHEET
+    bills_gid=os.getenv("GSHEET_BILLS_GID","").strip()
+    gl_sheet=os.getenv("GSHEET_GENERAL_LEDGER_SHEET",DEFAULT_GL_SHEET).strip() or DEFAULT_GL_SHEET
+    gl_gid=os.getenv("GSHEET_GENERAL_LEDGER_GID",DEFAULT_GL_GID).strip()
+    vb_sheet=os.getenv("GSHEET_VENDOR_BALANCE_SHEET",DEFAULT_VENDOR_BALANCE_SHEET).strip() or DEFAULT_VENDOR_BALANCE_SHEET
+    vb_gid=os.getenv("GSHEET_VENDOR_BALANCE_GID",DEFAULT_VENDOR_BALANCE_GID).strip()
+    client=GoogleSheetsClient(sid)
+    print(f"Reading QuickBooks Bills object import: {bills_sheet}")
+    try: bills_csv=client.fetch_csv(sheet_name=bills_sheet,gid=bills_gid)
+    except GoogleSheetsError as e:
+        raise SystemExit(f"BILLS SOURCE ERROR: {e}. Create a Coefficient QuickBooks Objects & Fields import named '{bills_sheet}' using the Bill object and include Id, DocNumber, TxnDate, DueDate, TotalAmt, Balance and VendorRef.")
+    print(f"Reading General Ledger: {gl_sheet}")
+    gl_csv=client.fetch_csv(sheet_name=gl_sheet,gid=gl_gid)
     try:
-        print(f"Reading General Ledger from Google Sheet: {gl_sheet or gl_gid}")
-        gl_csv = client.fetch_csv(sheet_name=gl_sheet, gid=gl_gid)
-    except GoogleSheetsError as exc:
-        print(f"::warning title=General Ledger download warning::{exc}")
-
-    data = build_dashboard(vendor_csv, gl_csv)
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
-    print(f"Company: {data['company']}")
-    print(f"Net AP: ${data['kpis']['total_ap']:,.2f}")
-    print(f"Gross open bills: ${data['kpis']['gross_open_bills']:,.2f}")
-    print(f"Credits/adjustments: ${data['kpis']['credits_adjustments']:,.2f}")
-    print(f"Vendor Balance control: ${data['reconciliation']['vendor_balance_total']:,.2f}")
-    print(f"Variance: ${data['reconciliation']['variance']:,.2f}")
-    print(f"Account mappings: {len(data['accounts_summary'])}")
+        vb_csv=client.fetch_csv(sheet_name=vb_sheet,gid=vb_gid)
+    except Exception as e:
+        print(f"::warning title=Vendor Balance optional control unavailable::{e}"); vb_csv=""
+    data=build_dashboard(bills_csv,gl_csv,vb_csv)
+    os.makedirs(DATA_DIR,exist_ok=True)
+    with open(OUTPUT_PATH,"w",encoding="utf-8") as f: json.dump(data,f,indent=2,ensure_ascii=False)
     print(f"Wrote {OUTPUT_PATH}")
+    print(f"Total AP from Bill.Balance: ${data['kpis']['total_ap']:,.2f}")
+    print(f"Open bills: {data['quality']['open_bills']}")
+    print(f"GL distribution rows: {data['quality']['general_ledger_usable_rows']}")
+    if data['reconciliation']['vendor_balance_available']:
+        print(f"Vendor Balance control: ${data['reconciliation']['vendor_balance_total']:,.2f}; variance ${data['reconciliation']['variance']:,.2f}")
+    else:
+        print("Vendor Balance control unavailable because the Coefficient report money fields are blank; this does NOT block the dashboard.")
 
-
-if __name__ == "__main__":
-    main()
+if __name__=="__main__": main()
