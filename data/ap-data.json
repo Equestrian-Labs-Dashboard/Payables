@@ -1,37 +1,582 @@
 {
-  "generated_at": "2026-08-05T09:00:00Z",
+  "generated_at": "2026-08-12T04:28:21.766008Z",
   "currency": "USD",
-  "source": "sample-data",
+  "source": "quickbooks_online",
+  "source_note": "QuickBooks Online; BILL-originated transactions are included when synchronized into QBO.",
+  "company": "Sandbox Company US c741",
   "kpis": {
-    "total_ap": 260430.50,
-    "not_yet_due": 118200.00,
-    "due_this_month": 61540.75,
-    "overdue_lt_3m": 54890.25,
-    "overdue_gt_3m": 25799.50
+    "total_ap": 1602.67,
+    "not_yet_due": 0.0,
+    "due_this_month": 0.0,
+    "overdue_lt_3m": 1602.67,
+    "overdue_gt_3m": 0.0
   },
+  "accounts_summary": [
+    {
+      "account": "Maintenance and Repair:Equipment Repairs",
+      "total": 755.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 755.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1,
+      "category": "Unclassified"
+    },
+    {
+      "account": "Legal & Professional Fees:Accounting",
+      "total": 315.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 315.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1,
+      "category": "G&A / OPEX"
+    },
+    {
+      "account": "Insurance",
+      "total": 241.23,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 241.23,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1,
+      "category": "G&A / OPEX"
+    },
+    {
+      "account": "Cost of Goods Sold",
+      "total": 205.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 205.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1,
+      "category": "Inventory"
+    },
+    {
+      "account": "Utilities:Gas and Electric",
+      "total": 86.44,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 86.44,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1,
+      "category": "G&A / OPEX"
+    }
+  ],
   "categories": [
-    { "name": "Inventory",             "total": 132500.00, "not_yet_due": 71000.00, "due_this_month": 32000.00, "overdue_lt_3m": 22500.00, "overdue_gt_3m": 7000.00 },
-    { "name": "Shipping & Fulfillment","total": 48900.50,  "not_yet_due": 21200.00, "due_this_month": 14300.75, "overdue_lt_3m": 9899.75,  "overdue_gt_3m": 3500.00 },
-    { "name": "Advertising",           "total": 39830.00,  "not_yet_due": 15000.00, "due_this_month": 9740.00,  "overdue_lt_3m": 10590.00, "overdue_gt_3m": 4500.00 },
-    { "name": "Sales & Marketing",     "total": 18200.00,  "not_yet_due": 6500.00,  "due_this_month": 4500.00,  "overdue_lt_3m": 5900.00,  "overdue_gt_3m": 1300.00 },
-    { "name": "G&A / OPEX",            "total": 19000.00,  "not_yet_due": 3500.00,  "due_this_month": 1000.00,  "overdue_lt_3m": 5000.50,  "overdue_gt_3m": 9499.50 },
-    { "name": "Unclassified",          "total": 2000.00,   "not_yet_due": 1000.00,  "due_this_month": 0.00,     "overdue_lt_3m": 1000.00,  "overdue_gt_3m": 0.00 }
+    {
+      "name": "Inventory",
+      "total": 205.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 205.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1
+    },
+    {
+      "name": "Shipping & Fulfillment",
+      "total": 0.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 0.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 0
+    },
+    {
+      "name": "Advertising",
+      "total": 0.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 0.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 0
+    },
+    {
+      "name": "Sales & Marketing",
+      "total": 0.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 0.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 0
+    },
+    {
+      "name": "G&A / OPEX",
+      "total": 642.67,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 642.67,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 3
+    },
+    {
+      "name": "Unclassified",
+      "total": 755.0,
+      "not_yet_due": 0.0,
+      "due_this_month": 0.0,
+      "overdue_lt_3m": 755.0,
+      "overdue_gt_3m": 0.0,
+      "bill_count": 1
+    }
   ],
   "monthly_trend": [
-    { "month": "2026-03", "total_ap": 231400.00 },
-    { "month": "2026-04", "total_ap": 244900.00 },
-    { "month": "2026-05", "total_ap": 252300.00 },
-    { "month": "2026-06", "total_ap": 248750.00 },
-    { "month": "2026-07", "total_ap": 257100.00 },
-    { "month": "2026-08", "total_ap": 260430.50 }
+    {
+      "month": "2026-08",
+      "total_ap": 1602.67
+    }
+  ],
+  "data_quality": {
+    "open_bill_count": 5,
+    "paid_bill_count": 10,
+    "unclassified_count": 1,
+    "unclassified_balance": 755.0,
+    "missing_account_count": 0,
+    "missing_due_date_count": 0,
+    "duplicate_candidate_count": 0,
+    "available_vendor_credits": 0
+  },
+  "top_vendors": [
+    {
+      "vendor": "Diego's Road Warrior Bodyshop",
+      "balance": 755.0
+    },
+    {
+      "vendor": "Robertson & Associates",
+      "balance": 315.0
+    },
+    {
+      "vendor": "Brosnahan Insurance Agency",
+      "balance": 241.23
+    },
+    {
+      "vendor": "Norton Lumber and Building Materials",
+      "balance": 205.0
+    },
+    {
+      "vendor": "PG&E",
+      "balance": 86.44
+    }
   ],
   "invoices": [
-    { "vendor": "Meta Platforms",     "invoice_number": "INV-10234", "invoice_date": "2026-07-02", "due_date": "2026-08-01", "category": "Advertising", "original_amount": 12500.00, "amount_paid": 0.00, "remaining_balance": 12500.00, "days_overdue": 4, "status": "Overdue" },
-    { "vendor": "Google Ads",         "invoice_number": "INV-10240", "invoice_date": "2026-07-05", "due_date": "2026-09-05", "category": "Advertising", "original_amount": 9800.00,  "amount_paid": 0.00, "remaining_balance": 9800.00,  "days_overdue": 0, "status": "Not due" },
-    { "vendor": "ShipStation",        "invoice_number": "INV-10201", "invoice_date": "2026-06-15", "due_date": "2026-07-15", "category": "Shipping & Fulfillment", "original_amount": 6200.75, "amount_paid": 2000.00, "remaining_balance": 4200.75, "days_overdue": 21, "status": "Overdue" },
-    { "vendor": "Equine Supply Co.",  "invoice_number": "INV-10188", "invoice_date": "2026-05-20", "due_date": "2026-06-19", "category": "Inventory", "original_amount": 41000.00, "amount_paid": 41000.00, "remaining_balance": 0.00, "days_overdue": 0, "status": "Paid" },
-    { "vendor": "Notaria de Fe Publica Nro 17", "invoice_number": "INV-10099", "invoice_date": "2026-04-01", "due_date": "2026-05-01", "category": "G&A / OPEX", "original_amount": 9499.50, "amount_paid": 0.00, "remaining_balance": 9499.50, "days_overdue": 96, "status": "Overdue" },
-    { "vendor": "Warehouse Partners", "invoice_number": "INV-10250", "invoice_date": "2026-07-20", "due_date": "2026-08-20", "category": "Shipping & Fulfillment", "original_amount": 14300.75, "amount_paid": 0.00, "remaining_balance": 14300.75, "days_overdue": 0, "status": "Due this month" },
-    { "vendor": "Unmapped Vendor LLC","invoice_number": "INV-10260", "invoice_date": "2026-07-25", "due_date": "2026-08-25", "category": "Unclassified", "original_amount": 1000.00, "amount_paid": 0.00, "remaining_balance": 1000.00, "days_overdue": 0, "status": "Not due" }
+    {
+      "id": "78",
+      "vendor": "PG&E",
+      "invoice_number": "",
+      "invoice_date": "2026-04-14",
+      "due_date": "2026-05-14",
+      "primary_account": "Utilities:Gas and Electric",
+      "account_labels": [
+        "Utilities:Gas and Electric"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Utilities:Gas and Electric",
+          "category": "G&A / OPEX",
+          "line_amount": 86.44,
+          "open_balance": 86.44
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Rent / Office",
+      "original_amount": 86.44,
+      "amount_paid": 0.0,
+      "remaining_balance": 86.44,
+      "days_overdue": 90,
+      "status": "Overdue",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "108",
+      "vendor": "Robertson & Associates",
+      "invoice_number": "",
+      "invoice_date": "2026-05-29",
+      "due_date": "2026-05-29",
+      "primary_account": "Legal & Professional Fees:Accounting",
+      "account_labels": [
+        "Legal & Professional Fees:Accounting"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Legal & Professional Fees:Accounting",
+          "category": "G&A / OPEX",
+          "line_amount": 315.0,
+          "open_balance": 315.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Professional Services",
+      "original_amount": 315.0,
+      "amount_paid": 0.0,
+      "remaining_balance": 315.0,
+      "days_overdue": 75,
+      "status": "Overdue",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "126",
+      "vendor": "Norton Lumber and Building Materials",
+      "invoice_number": "",
+      "invoice_date": "2026-05-29",
+      "due_date": "2026-05-29",
+      "primary_account": "Cost of Goods Sold",
+      "account_labels": [
+        "Cost of Goods Sold"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Cost of Goods Sold",
+          "category": "Inventory",
+          "line_amount": 205.0,
+          "open_balance": 205.0
+        }
+      ],
+      "category": "Inventory",
+      "subcategory": "",
+      "original_amount": 205.0,
+      "amount_paid": 0.0,
+      "remaining_balance": 205.0,
+      "days_overdue": 75,
+      "status": "Overdue",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "19",
+      "vendor": "Brosnahan Insurance Agency",
+      "invoice_number": "",
+      "invoice_date": "2026-05-22",
+      "due_date": "2026-06-01",
+      "primary_account": "Insurance",
+      "account_labels": [
+        "Insurance"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Insurance",
+          "category": "G&A / OPEX",
+          "line_amount": 241.23,
+          "open_balance": 241.23
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Insurance / Fees",
+      "original_amount": 241.23,
+      "amount_paid": 0.0,
+      "remaining_balance": 241.23,
+      "days_overdue": 72,
+      "status": "Overdue",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "44",
+      "vendor": "Diego's Road Warrior Bodyshop",
+      "invoice_number": "",
+      "invoice_date": "2026-05-27",
+      "due_date": "2026-06-26",
+      "primary_account": "Maintenance and Repair:Equipment Repairs",
+      "account_labels": [
+        "Maintenance and Repair:Equipment Repairs"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Maintenance and Repair:Equipment Repairs",
+          "category": "Unclassified",
+          "line_amount": 755.0,
+          "open_balance": 755.0
+        }
+      ],
+      "category": "Unclassified",
+      "subcategory": "",
+      "original_amount": 755.0,
+      "amount_paid": 0.0,
+      "remaining_balance": 755.0,
+      "days_overdue": 47,
+      "status": "Overdue",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "90",
+      "vendor": "Robertson & Associates",
+      "invoice_number": "",
+      "invoice_date": "2026-01-25",
+      "due_date": "2026-02-24",
+      "primary_account": "Legal & Professional Fees:Lawyer",
+      "account_labels": [
+        "Legal & Professional Fees:Lawyer"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Legal & Professional Fees:Lawyer",
+          "category": "G&A / OPEX",
+          "line_amount": 300.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Professional Services",
+      "original_amount": 300.0,
+      "amount_paid": 300.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 169,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "105",
+      "vendor": "Cal Telephone",
+      "invoice_number": "",
+      "invoice_date": "2026-04-13",
+      "due_date": "2026-04-13",
+      "primary_account": "Utilities:Telephone",
+      "account_labels": [
+        "Utilities:Telephone"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Utilities:Telephone",
+          "category": "G&A / OPEX",
+          "line_amount": 56.5,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Rent / Office",
+      "original_amount": 56.5,
+      "amount_paid": 56.5,
+      "remaining_balance": 0.0,
+      "days_overdue": 121,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "2",
+      "vendor": "Hicks Hardware",
+      "invoice_number": "",
+      "invoice_date": "2026-04-22",
+      "due_date": "2026-04-22",
+      "primary_account": "Miscellaneous",
+      "account_labels": [
+        "Miscellaneous"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Miscellaneous",
+          "category": "Unclassified",
+          "line_amount": 250.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "Unclassified",
+      "subcategory": "",
+      "original_amount": 250.0,
+      "amount_paid": 250.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 112,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "3",
+      "vendor": "Tim Philip Masonry",
+      "invoice_number": "",
+      "invoice_date": "2026-05-14",
+      "due_date": "2026-05-14",
+      "primary_account": "Miscellaneous",
+      "account_labels": [
+        "Miscellaneous"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Miscellaneous",
+          "category": "Unclassified",
+          "line_amount": 666.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "Unclassified",
+      "subcategory": "",
+      "original_amount": 666.0,
+      "amount_paid": 666.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 90,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "1",
+      "vendor": "Brosnahan Insurance Agency",
+      "invoice_number": "",
+      "invoice_date": "2026-05-22",
+      "due_date": "2026-05-22",
+      "primary_account": "Miscellaneous",
+      "account_labels": [
+        "Miscellaneous"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Miscellaneous",
+          "category": "Unclassified",
+          "line_amount": 2000.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "Unclassified",
+      "subcategory": "",
+      "original_amount": 2000.0,
+      "amount_paid": 2000.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 82,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "18",
+      "vendor": "Books by Bessie",
+      "invoice_number": "",
+      "invoice_date": "2026-05-15",
+      "due_date": "2026-05-30",
+      "primary_account": "Legal & Professional Fees:Accounting",
+      "account_labels": [
+        "Legal & Professional Fees:Accounting"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Legal & Professional Fees:Accounting",
+          "category": "G&A / OPEX",
+          "line_amount": 75.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Professional Services",
+      "original_amount": 75.0,
+      "amount_paid": 75.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 74,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "24",
+      "vendor": "Hall Properties",
+      "invoice_number": "",
+      "invoice_date": "2026-05-13",
+      "due_date": "2026-06-12",
+      "primary_account": "Rent or Lease",
+      "account_labels": [
+        "Rent or Lease"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Rent or Lease",
+          "category": "G&A / OPEX",
+          "line_amount": 900.0,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Rent / Office",
+      "original_amount": 900.0,
+      "amount_paid": 900.0,
+      "remaining_balance": 0.0,
+      "days_overdue": 61,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "35",
+      "vendor": "PG&E",
+      "invoice_number": "",
+      "invoice_date": "2026-05-13",
+      "due_date": "2026-06-12",
+      "primary_account": "Utilities:Gas and Electric",
+      "account_labels": [
+        "Utilities:Gas and Electric"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Utilities:Gas and Electric",
+          "category": "G&A / OPEX",
+          "line_amount": 114.09,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Rent / Office",
+      "original_amount": 114.09,
+      "amount_paid": 114.09,
+      "remaining_balance": 0.0,
+      "days_overdue": 61,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "21",
+      "vendor": "Cal Telephone",
+      "invoice_number": "",
+      "invoice_date": "2026-05-13",
+      "due_date": "2026-06-12",
+      "primary_account": "Utilities:Telephone",
+      "account_labels": [
+        "Utilities:Telephone"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Utilities:Telephone",
+          "category": "G&A / OPEX",
+          "line_amount": 74.36,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "G&A / OPEX",
+      "subcategory": "Rent / Office",
+      "original_amount": 74.36,
+      "amount_paid": 74.36,
+      "remaining_balance": 0.0,
+      "days_overdue": 61,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    },
+    {
+      "id": "25",
+      "vendor": "Norton Lumber and Building Materials",
+      "invoice_number": "",
+      "invoice_date": "2026-05-26",
+      "due_date": "2026-06-25",
+      "primary_account": "Job Expenses:Job Materials:Decks and Patios",
+      "account_labels": [
+        "Job Expenses:Job Materials:Decks and Patios"
+      ],
+      "account_breakdown": [
+        {
+          "account": "Job Expenses:Job Materials:Decks and Patios",
+          "category": "Unclassified",
+          "line_amount": 103.55,
+          "open_balance": 0.0
+        }
+      ],
+      "category": "Unclassified",
+      "subcategory": "",
+      "original_amount": 103.55,
+      "amount_paid": 103.55,
+      "remaining_balance": 0.0,
+      "days_overdue": 48,
+      "status": "Paid",
+      "duplicate_candidate": false,
+      "missing_due_date": false
+    }
   ]
 }
