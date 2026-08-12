@@ -1,4 +1,9 @@
-"""Build data/ap-data.json from QuickBooks Online for the AP Executive Dashboard."""
+"""Build data/ap-data.json from QuickBooks Online for the AP Executive Dashboard.
+
+The dashboard is account-first: open AP is allocated proportionally to the
+QuickBooks expense/item accounts carried by each Bill line. Executive categories
+are a secondary roll-up, not the primary accounting view.
+"""
 
 import json
 import os
@@ -91,7 +96,6 @@ def classify_text(value, rules):
 def aging_bucket(due_date_str, today=None):
     today = today or date.today()
     if not due_date_str:
-        # Keep the bill inside Total AP and Not Yet Due, but data_quality tracks it separately.
         return "not_yet_due"
     due = datetime.strptime(due_date_str, "%Y-%m-%d").date()
     days = (due - today).days
@@ -122,22 +126,56 @@ def line_account_label(line, accounts, items):
     return ""
 
 
-def bill_classification(bill, accounts, items, vendor_name, vendor_map):
-    weighted = Counter()
-    labels = []
-    for line in bill.get("Line", []) or []:
-        label = line_account_label(line, accounts, items)
-        if not label:
-            continue
-        labels.append(label)
-        category = classify_text(label, ACCOUNT_CATEGORY_RULES)
-        if category:
-            weighted[category] += float(line.get("Amount", 0) or 0)
+def bill_account_allocations(bill, accounts, items, vendor_name, vendor_map, remaining_balance):
+    """Allocate an open bill balance across its QBO line accounts.
 
-    category = weighted.most_common(1)[0][0] if weighted else classify_vendor(vendor_name, vendor_map)
-    combined = " ".join(labels + [vendor_name])
-    subcategory = classify_text(combined, SUBCATEGORY_RULES) if category == "G&A / OPEX" else None
-    return category, subcategory or "", sorted(set(labels))
+    Partial payments are allocated proportionally to line amounts so account totals
+    reconcile exactly to the bill's current Balance.
+    """
+    raw = []
+    for line in bill.get("Line", []) or []:
+        amount = float(line.get("Amount", 0) or 0)
+        if amount <= 0:
+            continue
+        label = line_account_label(line, accounts, items) or "No account assigned"
+        category = classify_text(label, ACCOUNT_CATEGORY_RULES) or classify_vendor(vendor_name, vendor_map)
+        if category not in CATEGORIES:
+            category = "Unclassified"
+        raw.append((label, category, amount))
+
+    if not raw:
+        fallback_category = classify_vendor(vendor_name, vendor_map)
+        if fallback_category not in CATEGORIES:
+            fallback_category = "Unclassified"
+        return [{
+            "account": "No account assigned",
+            "category": fallback_category,
+            "line_amount": float(bill.get("TotalAmt", 0) or 0),
+            "open_balance": round(max(0.0, remaining_balance), 2),
+        }]
+
+    line_total = sum(x[2] for x in raw)
+    grouped = defaultdict(lambda: {"line_amount": 0.0, "category": "Unclassified"})
+    for label, category, amount in raw:
+        grouped[label]["line_amount"] += amount
+        grouped[label]["category"] = category
+
+    allocations = []
+    running = 0.0
+    rows = list(grouped.items())
+    for idx, (label, info) in enumerate(rows):
+        if idx == len(rows) - 1:
+            open_amt = round(max(0.0, remaining_balance) - running, 2)
+        else:
+            open_amt = round(max(0.0, remaining_balance) * info["line_amount"] / line_total, 2) if line_total else 0.0
+            running += open_amt
+        allocations.append({
+            "account": label,
+            "category": info["category"],
+            "line_amount": round(info["line_amount"], 2),
+            "open_balance": open_amt,
+        })
+    return allocations
 
 
 def duplicate_keys(invoice):
@@ -153,30 +191,62 @@ def duplicate_keys(invoice):
     return keys
 
 
+def blank_rollup(name_key, name):
+    return {
+        name_key: name,
+        "total": 0.0,
+        "not_yet_due": 0.0,
+        "due_this_month": 0.0,
+        "overdue_lt_3m": 0.0,
+        "overdue_gt_3m": 0.0,
+        "bill_count": 0,
+    }
+
+
 def build_dataset(raw_bills, vendor_credits, accounts, items, vendor_map, company_info=None, previous_trend=None):
     kpis = {k: 0.0 for k in ["total_ap", "not_yet_due", "due_this_month", "overdue_lt_3m", "overdue_gt_3m"]}
-    categories = {
-        cat: {"name": cat, "total": 0.0, "not_yet_due": 0.0, "due_this_month": 0.0, "overdue_lt_3m": 0.0, "overdue_gt_3m": 0.0}
-        for cat in CATEGORIES
-    }
+    category_rollup = {cat: blank_rollup("name", cat) for cat in CATEGORIES}
+    account_rollup = {}
     invoices = []
 
     for bill in raw_bills:
         vendor_ref = bill.get("VendorRef") or {}
         vendor_name = vendor_ref.get("name") or "Unknown vendor"
         total_amount = float(bill.get("TotalAmt", 0) or 0)
-        remaining = float(bill.get("Balance", 0) or 0)
+        remaining = max(0.0, float(bill.get("Balance", 0) or 0))
         due_date = bill.get("DueDate") or ""
-        category, subcategory, account_labels = bill_classification(bill, accounts, items, vendor_name, vendor_map)
-        if category not in categories:
-            category = "Unclassified"
-
         bucket = aging_bucket(due_date) if remaining > 0 else None
+        allocations = bill_account_allocations(bill, accounts, items, vendor_name, vendor_map, remaining)
+        allocations_sorted = sorted(allocations, key=lambda x: x["open_balance"], reverse=True)
+        primary_account = allocations_sorted[0]["account"] if allocations_sorted else "No account assigned"
+        primary_category = allocations_sorted[0]["category"] if allocations_sorted else "Unclassified"
+
         if remaining > 0:
             kpis["total_ap"] += remaining
             kpis[bucket] += remaining
-            categories[category]["total"] += remaining
-            categories[category][bucket] += remaining
+
+            touched_categories = set()
+            touched_accounts = set()
+            for allocation in allocations:
+                account = allocation["account"]
+                category = allocation["category"]
+                open_amt = allocation["open_balance"]
+
+                if account not in account_rollup:
+                    account_rollup[account] = blank_rollup("account", account)
+                    account_rollup[account]["category"] = category
+                account_rollup[account]["total"] += open_amt
+                account_rollup[account][bucket] += open_amt
+                touched_accounts.add(account)
+
+                category_rollup[category]["total"] += open_amt
+                category_rollup[category][bucket] += open_amt
+                touched_categories.add(category)
+
+            for account in touched_accounts:
+                account_rollup[account]["bill_count"] += 1
+            for category in touched_categories:
+                category_rollup[category]["bill_count"] += 1
 
         days_overdue = 0
         if due_date:
@@ -192,18 +262,23 @@ def build_dataset(raw_bills, vendor_credits, accounts, items, vendor_map, compan
         else:
             status = "Not due"
 
+        combined = " ".join([a["account"] for a in allocations] + [vendor_name])
+        subcategory = classify_text(combined, SUBCATEGORY_RULES) if primary_category == "G&A / OPEX" else ""
+
         invoices.append({
             "id": str(bill.get("Id", "")),
             "vendor": vendor_name,
             "invoice_number": bill.get("DocNumber", ""),
             "invoice_date": bill.get("TxnDate", ""),
             "due_date": due_date,
-            "category": category,
-            "subcategory": subcategory,
-            "account_labels": account_labels,
+            "primary_account": primary_account,
+            "account_labels": [a["account"] for a in allocations],
+            "account_breakdown": allocations,
+            "category": primary_category,
+            "subcategory": subcategory or "",
             "original_amount": round(total_amount, 2),
             "amount_paid": round(max(0.0, total_amount - remaining), 2),
-            "remaining_balance": round(max(0.0, remaining), 2),
+            "remaining_balance": round(remaining, 2),
             "days_overdue": days_overdue,
             "status": status,
             "duplicate_candidate": False,
@@ -232,16 +307,27 @@ def build_dataset(raw_bills, vendor_credits, accounts, items, vendor_map, compan
     unclassified = [x for x in open_invoices if x["category"] == "Unclassified"]
     missing_due = [x for x in open_invoices if x["missing_due_date"]]
     duplicates = [x for x in invoices if x["duplicate_candidate"]]
+    no_account = [x for x in open_invoices if "No account assigned" in x.get("account_labels", [])]
 
     data_quality = {
         "open_bill_count": len(open_invoices),
         "paid_bill_count": len(invoices) - len(open_invoices),
         "unclassified_count": len(unclassified),
         "unclassified_balance": round(sum(x["remaining_balance"] for x in unclassified), 2),
+        "missing_account_count": len(no_account),
         "missing_due_date_count": len(missing_due),
         "duplicate_candidate_count": len(duplicates),
         "available_vendor_credits": round(available_vendor_credits, 2),
     }
+
+    def cleaned_rows(rows):
+        out = []
+        for row in rows:
+            out.append({k: round(v, 2) if isinstance(v, float) else v for k, v in row.items()})
+        return out
+
+    accounts_summary = cleaned_rows(sorted(account_rollup.values(), key=lambda x: x["total"], reverse=True))
+    categories_summary = cleaned_rows(category_rollup.values())
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -250,10 +336,8 @@ def build_dataset(raw_bills, vendor_credits, accounts, items, vendor_map, compan
         "source_note": "QuickBooks Online; BILL-originated transactions are included when synchronized into QBO.",
         "company": (company_info or {}).get("CompanyName", ""),
         "kpis": {k: round(v, 2) for k, v in kpis.items()},
-        "categories": [
-            {k: (round(v, 2) if isinstance(v, float) else v) for k, v in cat.items()}
-            for cat in categories.values()
-        ],
+        "accounts_summary": accounts_summary,
+        "categories": categories_summary,
         "monthly_trend": update_monthly_trend(previous_trend or [], kpis["total_ap"]),
         "data_quality": data_quality,
         "top_vendors": [
@@ -278,12 +362,9 @@ def main():
     with open(OUTPUT_PATH, "w", encoding="utf-8") as handle:
         json.dump(dataset, handle, indent=2, ensure_ascii=False)
 
-    print(f"QuickBooks environment: {client.environment}")
-    print(f"Company: {dataset.get('company') or client.realm_id}")
-    print(f"Bills loaded: {len(dataset['invoices'])}; open: {dataset['data_quality']['open_bill_count']}")
-    print(f"Total AP: {dataset['kpis']['total_ap']:.2f}")
-    if client.latest_refresh_token and client.latest_refresh_token != client.refresh_token:
-        print("NOTICE: Intuit returned a newer refresh token. Update QBO_REFRESH_TOKEN securely if needed.")
+    print(f"Wrote {OUTPUT_PATH}")
+    print(f"Open AP: {dataset['kpis']['total_ap']}")
+    print(f"Accounts with open AP: {len(dataset['accounts_summary'])}")
 
 
 if __name__ == "__main__":
