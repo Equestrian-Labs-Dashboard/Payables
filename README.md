@@ -1,32 +1,62 @@
-# Accounts Payable Dashboard — FIX15
+# Accounts Payable Dashboard — FIX16 / Weekly Close
 
-Authoritative source: **QuickBooks Bill object → Coefficient → Google Sheets**.
+This version closes the functional changes reviewed in the meeting while keeping **QuickBooks as the authoritative source** through Coefficient → Google Sheets.
 
-## Live source identifiers
-- Spreadsheet ID: `1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c`
-- QuickBooks Bill gid: `1297077839`
-- General Ledger gid: `186431676`
+## Meeting changes implemented
+- Keeps QuickBooks Bill object as the AP source of truth.
+- Shows a non-authoritative **~$373K BILL meeting reference** only for follow-up comparison; it never changes QuickBooks totals.
+- Removes **Aging of Current AP** chart (aging remains in KPI cards).
+- Removes **6-Month AP Trend**.
+- Moves **Top Vendor Concentration** and **AP by Executive Categories** to the primary view.
+- Adds **% of Open AP** to the category summary.
+- Keeps **AP by QuickBooks Account**.
+- Adds a **Priority Invoice Review** block for Yotpo #1, Yotpo #2 and RebatesMe.
+- Generates `data/priority-invoice-review.csv` for the follow-up with accounting.
+- Keeps a second-control flag for after accountants finish QuickBooks manual updates.
 
-No QuickBooks API secret is required by GitHub Actions. Coefficient owns the authenticated QuickBooks connection. The Google Sheet must remain readable by the workflow (current implementation uses the public CSV export URL).
-
-## Important FIX15 corrections
-1. Groups Coefficient's split line rows by **Bill Id**, so a Bill is counted once.
-2. Uses **Vendor Name (Vendor Reference)** directly; no more `Unknown vendor`.
-3. Converts non-USD Bill balances to USD with **Exchange Rate** before summing AP.
-4. Uses each Bill's own **line Account Name + Amount** to allocate AP by QuickBooks account.
-5. Partially paid Bills allocate remaining balance proportionally across their original line amounts.
-6. General Ledger is fallback only; it is not needed when Bill line accounts exist.
-7. Account allocations are forced to reconcile to Total AP; workflow fails if variance exceeds $0.05.
-8. Bill detail defaults to **Open** so historical paid Bills do not overwhelm the AP view.
-
-## Validation against `Payables 2026.xlsx` supplied 2026-08-12
-- Historical Bills: 9,218
-- Open Bills: 123
-- Total AP in USD after FX: **$234,867.27**
-- Overdue < 3 months: **$93,584.69**
-- Overdue > 3 months: **$141,282.58**
-- Not yet due: **$0.00**
-- Due this month: **$0.00**
+## Current validation from the supplied Payables 2026 workbook
+- Current QuickBooks Open AP: **$234,867.27**
+- Open Bills: **123**
+- Approx. BILL meeting reference: **$373,000**
+- Current gap vs reference: **-$138,132.73**
 - Account allocation variance: **$0.00**
 
-The prior $314,050.34 total was incorrect because two SEK Bills were being summed as if their native SEK balances were USD. FIX15 applies their QuickBooks Exchange Rate.
+The $373K reference is intentionally **not** used to force or alter the dashboard total.
+
+## Priority invoice review
+1. **Yotpo Inc. — ZINVYUS00445073** — $5,845.98 open — due 2024-09-16 — Software Purchase. General Ledger contains a voided Bill Payment reference.
+2. **Yotpo Inc. — ZINVYUS00478594** — $5,845.98 open — due 2024-12-17 — Software Purchase. General Ledger contains a voided Bill Payment reference.
+3. **RebatesMe LLC — 2025Q1-0003** — $500.00 open — due 2024-12-19 — Selling & Marketing Expense. No matching payment resolution was found in the imported General Ledger.
+
+The actual invoice PDF/attachment is **not included in the Coefficient imports**, so the dashboard flags these rows for document retrieval from QuickBooks/BILL.
+
+## Executive category logic
+QuickBooks account coding has priority. Vendor mapping is now only a fallback.
+
+Current categories from the supplied workbook:
+- Inventory — 53.09%
+- G&A / OPEX — 18.81%
+- Professional Services — 13.46%
+- Sales & Marketing — 6.31%
+- Shipping & Fulfillment — 5.36%
+- Unclassified — 1.90%
+- Advertising — 1.09%
+
+## GitHub source configuration
+No new sensitive credentials are required.
+
+The workflow uses:
+- `GSHEET_ID` (default already configured)
+- `GSHEET_BILLS_GID = 1297077839`
+- `GSHEET_GENERAL_LEDGER_GID = 186431676`
+
+QuickBooks authentication remains inside Coefficient.
+
+## Replace in GitHub
+Replace the whole package, especially:
+- `index.html`
+- `scripts/transform.py`
+- `scripts/google_sheets_client.py`
+- `.github/workflows/update-ap-data.yml`
+
+Then run **Actions → Update AP Dashboard Data → Run workflow**.

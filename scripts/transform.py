@@ -29,6 +29,7 @@ from google_sheets_client import GoogleSheetsClient, GoogleSheetsError
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.abspath(os.path.join(HERE, "..", "data"))
 OUTPUT_PATH = os.path.join(DATA_DIR, "ap-data.json")
+PRIORITY_REVIEW_PATH = os.path.join(DATA_DIR, "priority-invoice-review.csv")
 VENDOR_MAP_PATH = os.path.join(DATA_DIR, "vendor-map.json")
 
 DEFAULT_GSHEET_ID = "1wU-is7u0YFXbI3ZRYZ2MlEO-mqY8bD4NAXouNxhg73c"
@@ -43,9 +44,15 @@ CATEGORIES = [
     "Shipping & Fulfillment",
     "Advertising",
     "Sales & Marketing",
+    "Professional Services",
     "G&A / OPEX",
     "Unclassified",
 ]
+
+# Meeting reference only. This is NOT used to force or adjust QuickBooks AP.
+# It exists solely to make the pending comparison visible until accounting
+# finishes its manual QuickBooks updates and the dashboard is checked again.
+BILL_REFERENCE_AP = 373000.0
 
 # Account rules are evaluated after explicit vendor rules.  The vendor override
 # is intentional for vendors whose accounting account is too broad for the
@@ -59,7 +66,7 @@ ACCOUNT_CATEGORY_RULES = [
     ]),
     ("Advertising", [
         "advertising", "advertisement", "paid media", "google ads", "meta ads",
-        "facebook ads", "ad spend", "ppc", "media buying", "affiliate support",
+        "facebook ads", "ad spend", "ppc", "media buying",
     ]),
     ("Sales & Marketing", [
         "selling & marketing", "marketing expense", "creative", "content",
@@ -71,13 +78,17 @@ ACCOUNT_CATEGORY_RULES = [
         "cogs", "merchandise", "product cost", "purchases for resale",
         "purchases - resale",
     ]),
+    ("Professional Services", [
+        "professional service", "professional fee", "accounting fee",
+        "accounting fees", "legal fee", "legal fees", "consulting", "consultant",
+        "audit fee", "tax preparation",
+    ]),
     ("G&A / OPEX", [
         "employee reimbursement", "maintenance", "repair", "payroll", "wages",
-        "salary", "staff", "contract labor", "contractor", "consulting",
-        "professional service", "professional fee", "software", "subscription",
-        "rent", "lease", "office", "insurance", "legal", "accounting",
-        "bank fee", "merchant fee", "utilities", "gas and electric",
-        "general & administrative", "g&a", "opex", "tax", "audit",
+        "salary", "staff", "contract labor", "contractor",
+        "software", "subscription", "rent", "lease", "office", "insurance",
+        "legal", "accounting", "bank fee", "merchant fee", "utilities",
+        "gas and electric", "general & administrative", "g&a", "opex", "tax",
         "intangible asset", "trademark",
     ]),
 ]
@@ -153,6 +164,14 @@ def parse_date(v):
             return datetime.strptime(s, fmt).date().isoformat()
         except ValueError:
             pass
+    # Coefficient/Excel exports can expose dates as Excel serial numbers.
+    try:
+        serial = float(s)
+        if 20000 <= serial <= 80000:
+            from datetime import timedelta
+            return (datetime(1899, 12, 30) + timedelta(days=serial)).date().isoformat()
+    except ValueError:
+        pass
     return ""
 
 
@@ -195,15 +214,19 @@ def vendor_override(vendor, vm):
 
 
 def classify_account(account, vendor, vm):
-    # Explicit executive vendor mapping wins for known vendors.
-    override = vendor_override(vendor, vm)
-    if override:
-        return override
+    """Classify from the actual QuickBooks account first.
+
+    Vendor mapping is only a fallback when the Bill/GL account is missing or too
+    generic. This keeps the dashboard faithful to QuickBooks coding and avoids
+    re-labeling Software, Rent, Professional Services, etc. just because of the
+    vendor name.
+    """
     a = text(account).lower()
     for cat, kws in ACCOUNT_CATEGORY_RULES:
         if any(k in a for k in kws):
             return cat
-    return "Unclassified"
+    override = vendor_override(vendor, vm)
+    return override or "Unclassified"
 
 
 def aging_bucket(due_iso, today):
@@ -343,21 +366,27 @@ def gl_account_is_distribution(account):
 def parse_general_ledger(csv_text):
     """Build lightweight fallback mappings for Bills missing line-account coding."""
     if not csv_text.strip():
-        return {"invoice": {}, "vendor": {}, "usable_rows": 0}
+        return {"invoice": {}, "vendor": {}, "usable_rows": 0, "voided_invoice_refs": set()}
     rows = rows_from_csv(csv_text)
     hi, h = find_gl_header(rows)
     if hi is None:
         print("::warning title=General Ledger::Header not recognized; Bill line accounts will still be used.")
-        return {"invoice": {}, "vendor": {}, "usable_rows": 0}
+        return {"invoice": {}, "vendor": {}, "usable_rows": 0, "voided_invoice_refs": set()}
 
     invoice = defaultdict(lambda: defaultdict(float))
     vendor = defaultdict(lambda: defaultdict(float))
     usable = 0
+    voided_invoice_refs = set()
     for row in rows[hi + 1 :]:
         t = text(first_cell(row, h, "transaction_type"))
         v = text(first_cell(row, h, "vendor"))
         a = text(first_cell(row, h, "account"))
         n = text(first_cell(row, h, "doc_number"))
+        memo = text(first_cell(row, h, "memo"))
+        if "voided - inv" in memo.lower():
+            m = re.search(r"voided\s*-?\s*inv\s+([^\s,;]+)", memo, re.I)
+            if m:
+                voided_invoice_refs.add(norm(m.group(1)))
         if t.lower() != "bill" or not v or not gl_account_is_distribution(a):
             continue
         weights = []
@@ -374,7 +403,7 @@ def parse_general_ledger(csv_text):
         vendor[vk][a] += w
         usable += 1
     print(f"General Ledger fallback distribution rows: {usable}")
-    return {"invoice": invoice, "vendor": vendor, "usable_rows": usable}
+    return {"invoice": invoice, "vendor": vendor, "usable_rows": usable, "voided_invoice_refs": voided_invoice_refs}
 
 
 def fallback_gl_weights(bill, gl):
@@ -475,6 +504,43 @@ def update_trend(prev, total):
     by_month = {str(x.get("month")): x for x in prev if x.get("month")}
     by_month[month] = {"month": month, "total_ap": round(total, 2)}
     return [by_month[k] for k in sorted(by_month)[-6:]]
+
+
+def build_priority_review(invoices, gl):
+    """Meeting follow-up: Yotpo #1, Yotpo #2 and Rebate.
+
+    Values come from the current QuickBooks Bill import; no amount is forced.
+    """
+    out = []
+    voided = gl.get("voided_invoice_refs", set()) or set()
+    for inv in invoices:
+        if inv.get("remaining_balance", 0) <= 0.005:
+            continue
+        v = text(inv.get("vendor")).lower()
+        is_yotpo = "yotpo" in v
+        is_rebate = "rebatesme" in v or v.startswith("rebate")
+        if not (is_yotpo or is_rebate):
+            continue
+        inv_norm = norm(inv.get("invoice_number"))
+        if is_yotpo:
+            evidence = "Voided Bill Payment reference found in General Ledger" if inv_norm in voided else "No payment resolution found in imported GL"
+            reason = "Legacy Yotpo software bill still open; obtain the invoice and confirm with accountants whether it should remain payable."
+        else:
+            evidence = "Open Bill in QuickBooks; no matching payment resolution found in imported GL"
+            reason = "Rebate-related bill remains open; obtain the invoice and confirm the liability with accountants."
+        out.append({
+            "vendor": inv.get("vendor"),
+            "invoice_number": inv.get("invoice_number"),
+            "invoice_date": inv.get("invoice_date"),
+            "due_date": inv.get("due_date"),
+            "remaining_balance": inv.get("remaining_balance"),
+            "primary_account": inv.get("primary_account"),
+            "category": inv.get("category"),
+            "evidence": evidence,
+            "review_reason": reason,
+            "invoice_document_status": "Not included in current Coefficient import — retrieve from QuickBooks/BILL",
+        })
+    return sorted(out, key=lambda x: (0 if "yotpo" in text(x["vendor"]).lower() else 1, x.get("invoice_date") or ""))
 
 
 def build_dashboard(bills_csv, gl_csv=""):
@@ -600,6 +666,8 @@ def build_dashboard(bills_csv, gl_csv=""):
         key=lambda x: x["total"], reverse=True,
     )
     category_summary = sorted(categories.values(), key=lambda x: x["total"], reverse=True)
+    for row in category_summary:
+        row["pct_total"] = round((row["total"] / total_ap * 100.0) if total_ap else 0.0, 2)
     top_vendors = [
         {"vendor": vendor, "balance": round(balance, 2)}
         for vendor, balance in sorted(vendors.items(), key=lambda x: x[1], reverse=True)[:12]
@@ -607,6 +675,9 @@ def build_dashboard(bills_csv, gl_csv=""):
 
     open_bill_count = sum(1 for x in invoices if x["remaining_balance"] > 0.005)
     paid_bill_count = len(invoices) - open_bill_count
+
+    priority_review = build_priority_review(invoices, gl)
+    bill_reference_gap = round(total_ap - BILL_REFERENCE_AP, 2)
 
     data_quality = {
         "open_bill_count": open_bill_count,
@@ -630,6 +701,18 @@ def build_dashboard(bills_csv, gl_csv=""):
         ),
         "company": "Equestrian Labs, Inc. (dba Corro)",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "closeout_status": {
+            "functional_status": "Ready for weekly close",
+            "quickbooks_current_ap": total_ap,
+            "bill_reference_ap": BILL_REFERENCE_AP,
+            "bill_reference_is_approximate": True,
+            "gap_vs_bill_reference": bill_reference_gap,
+            "note": (
+                "The BILL amount is an approximate meeting reference only and is not used to alter the dashboard. "
+                "QuickBooks remains the authoritative source. Re-check after accountants complete manual QuickBooks updates."
+            ),
+            "second_check_required": True,
+        },
         "kpis": {
             "total_ap": total_ap,
             "gross_open_bills": total_ap,
@@ -655,7 +738,7 @@ def build_dashboard(bills_csv, gl_csv=""):
         "accounts_summary": account_summary,
         "categories": category_summary,
         "top_vendors": top_vendors,
-        "monthly_trend": update_trend(load_previous_trend(), total_ap),
+        "priority_invoice_review": priority_review,
         "invoices": sorted(
             invoices,
             key=lambda x: (
@@ -702,7 +785,20 @@ def main():
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+    review_rows = data.get("priority_invoice_review", []) or []
+    with open(PRIORITY_REVIEW_PATH, "w", newline="", encoding="utf-8") as f:
+        fields = [
+            "vendor", "invoice_number", "invoice_date", "due_date",
+            "remaining_balance", "primary_account", "category", "evidence",
+            "review_reason", "invoice_document_status",
+        ]
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        for row in review_rows:
+            writer.writerow({k: row.get(k, "") for k in fields})
+
     print(f"Wrote {OUTPUT_PATH}")
+    print(f"Wrote {PRIORITY_REVIEW_PATH}")
     print(f"Total AP (USD): ${data['kpis']['total_ap']:,.2f}")
     print(f"Open bills: {data['data_quality']['open_bill_count']}")
     print(f"Account allocation variance: ${data['reconciliation']['variance']:,.2f}")
