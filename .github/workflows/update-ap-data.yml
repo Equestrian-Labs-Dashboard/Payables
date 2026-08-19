@@ -69,10 +69,16 @@ jobs:
           bills = int(d.get('quality', {}).get('open_bills', 0) or 0)
           accounts = len(d.get('accounts_summary', []) or [])
           vendors = len(d.get('top_vendors', []) or [])
+          priority = d.get('priority_invoice_review', []) or []
+          closeout = d.get('closeout_status', {}) or {}
           print(f"Total AP: ${total:,.2f}")
           print(f"Open bills: {bills}")
           print(f"Accounts with AP: {accounts}")
           print(f"Top vendor rows: {vendors}")
+          print(f"Priority invoice review rows: {len(priority)}")
+          if closeout:
+              print(f"Approx BILL meeting reference: ${float(closeout.get('bill_reference_ap',0) or 0):,.2f}")
+              print(f"Gap vs reference (not an adjustment): ${float(closeout.get('gap_vs_bill_reference',0) or 0):,.2f}")
           if bills <= 0:
               raise SystemExit('No open Bills were parsed from Coefficient QuickBooks Bill import.')
           if total <= 0:
@@ -80,15 +86,17 @@ jobs:
           if not d.get('invoices'):
               raise SystemExit('Invoice detail is empty.')
           r = d.get('reconciliation', {})
-          if r.get('vendor_balance_available') and abs(float(r.get('variance', 0) or 0)) > 0.02:
-              print('::warning title=Vendor Balance variance::Bill.Balance and Vendor Balance Detail differ. This may be caused by vendor credits/unapplied credits; Bill.Balance remains the AP source.')
+          if abs(float(r.get('variance', 0) or 0)) > 0.05:
+              raise SystemExit('Account allocation does not reconcile to current QuickBooks Bill balances.')
+          if len(priority) < 3:
+              print('::warning title=Priority invoice review::Fewer than 3 Yotpo/Rebate open bills were found. This can be expected after accountants update QuickBooks; review the current source.')
           PY
 
       - name: Commit updated dashboard data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ap-data.json
+          git add data/ap-data.json data/priority-invoice-review.csv
           if git diff --staged --quiet; then
             echo "No AP data changes to commit."
           else
