@@ -60,3 +60,7 @@ Replace the whole package, especially:
 - `.github/workflows/update-ap-data.yml`
 
 Then run **Actions → Update AP Dashboard Data → Run workflow**.
+
+
+## FIX17
+The meeting-requested Yotpo/Rebate section now shows only factual QuickBooks fields (vendor, invoice number, dates, amounts, aging, status, account, category). Review/evidence/action narrative was removed.

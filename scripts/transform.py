@@ -507,41 +507,46 @@ def update_trend(prev, total):
 
 
 def build_priority_review(invoices, gl):
-    """Meeting follow-up: Yotpo #1, Yotpo #2 and Rebate.
+    """Return only factual QuickBooks fields for the meeting-requested invoices.
 
-    Values come from the current QuickBooks Bill import; no amount is forced.
+    This section is informational only. It does not infer actions, evidence,
+    or accounting conclusions.
     """
     out = []
-    voided = gl.get("voided_invoice_refs", set()) or set()
     for inv in invoices:
         if inv.get("remaining_balance", 0) <= 0.005:
             continue
-        v = text(inv.get("vendor")).lower()
-        is_yotpo = "yotpo" in v
-        is_rebate = "rebatesme" in v or v.startswith("rebate")
+
+        vendor_lower = text(inv.get("vendor")).lower()
+        is_yotpo = "yotpo" in vendor_lower
+        is_rebate = "rebatesme" in vendor_lower or vendor_lower.startswith("rebate")
+
         if not (is_yotpo or is_rebate):
             continue
-        inv_norm = norm(inv.get("invoice_number"))
-        if is_yotpo:
-            evidence = "Voided Bill Payment reference found in General Ledger" if inv_norm in voided else "No payment resolution found in imported GL"
-            reason = "Legacy Yotpo software bill still open; obtain the invoice and confirm with accountants whether it should remain payable."
-        else:
-            evidence = "Open Bill in QuickBooks; no matching payment resolution found in imported GL"
-            reason = "Rebate-related bill remains open; obtain the invoice and confirm the liability with accountants."
+
         out.append({
             "vendor": inv.get("vendor"),
             "invoice_number": inv.get("invoice_number"),
             "invoice_date": inv.get("invoice_date"),
             "due_date": inv.get("due_date"),
+            "original_amount": inv.get("original_amount"),
+            "amount_paid": inv.get("amount_paid"),
             "remaining_balance": inv.get("remaining_balance"),
+            "days_overdue": inv.get("days_overdue"),
+            "status": inv.get("status"),
             "primary_account": inv.get("primary_account"),
             "category": inv.get("category"),
-            "evidence": evidence,
-            "review_reason": reason,
-            "invoice_document_status": "Not included in current Coefficient import — retrieve from QuickBooks/BILL",
+            "currency": inv.get("currency", "USD"),
         })
-    return sorted(out, key=lambda x: (0 if "yotpo" in text(x["vendor"]).lower() else 1, x.get("invoice_date") or ""))
 
+    return sorted(
+        out,
+        key=lambda x: (
+            0 if "yotpo" in text(x.get("vendor")).lower() else 1,
+            x.get("invoice_date") or "",
+            x.get("invoice_number") or "",
+        ),
+    )
 
 def build_dashboard(bills_csv, gl_csv=""):
     vm = load_vendor_map()
