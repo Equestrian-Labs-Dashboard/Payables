@@ -66,5 +66,5 @@ Then run **Actions → Update AP Dashboard Data → Run workflow**.
 The meeting-requested Yotpo/Rebate section now shows only factual QuickBooks fields (vendor, invoice number, dates, amounts, aging, status, account, category). Review/evidence/action narrative was removed.
 
 
-## FIX18
-Removed the meeting-specific Invoices requested for review section from the dashboard UI. The same invoices remain available in Bill detail and source data.
+## FIX19
+Removed only the meeting-specific invoice review section. Close-out source check and primary executive views remain intact. JavaScript no longer calls a removed DOM section.
